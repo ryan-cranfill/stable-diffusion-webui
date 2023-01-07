@@ -6,6 +6,7 @@ from pathlib import Path
 import SharedArray as sa
 from screeninfo import get_monitors
 
+from src.utils import make_shared_mem
 from src.settings import TARGET_SIZE, IMAGE_OPTIONS
 
 
@@ -17,17 +18,6 @@ print('monitors:', monitors)
 
 img_dim = np.array(TEST_IMAGES[0]).shape
 print('img_dim:', img_dim)
-
-
-def make_shared_mem(name, shape, dtype=np.uint8):
-    try:
-        mem = sa.create(f'shm://{name}', shape, dtype=dtype)
-    except FileExistsError:
-        print('FileExistsError, deleting and recreating', name)
-        sa.delete(name)
-        mem = sa.create(f'shm://{name}', shape, dtype=dtype)
-    return mem
-
 
 changes = np.zeros(len(monitors), dtype=np.int8)
 changes_shared_mem = make_shared_mem('changes', changes.shape, dtype=changes.dtype)
