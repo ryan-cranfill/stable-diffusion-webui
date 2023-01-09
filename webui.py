@@ -4,7 +4,7 @@ import threading
 import time
 import importlib
 import signal
-import threading
+import re
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -12,6 +12,11 @@ from fastapi.middleware.gzip import GZipMiddleware
 from modules import import_hook, errors
 from modules.call_queue import wrap_queued_call, queue_lock, wrap_gradio_gpu_call
 from modules.paths import script_path
+
+import torch
+# Truncate version number of nightly/local build of PyTorch to not cause exceptions with CodeFormer or Safetensors
+if ".dev" in torch.__version__ or "+git" in torch.__version__:
+    torch.__version__ = re.search(r'[\d.]+[\d]', torch.__version__).group(0)
 
 from modules import shared, devices, sd_samplers, upscaler, extensions, localization, ui_tempdir
 import modules.codeformer_model as codeformer
@@ -28,6 +33,7 @@ import modules.sd_models
 import modules.sd_vae
 import modules.txt2img
 import modules.script_callbacks
+import modules.textual_inversion.textual_inversion
 
 import modules.ui
 from modules import modelloader
@@ -61,6 +67,8 @@ def initialize():
     modelloader.load_upscalers()
 
     modules.sd_vae.refresh_vae_list()
+
+    modules.textual_inversion.textual_inversion.list_textual_inversion_templates()
 
     try:
         modules.sd_models.load_model()
@@ -182,12 +190,14 @@ def webui():
 
         sd_samplers.set_samplers()
 
+        modules.script_callbacks.script_unloaded_callback()
         extensions.list_extensions()
 
         localization.list_localizations(cmd_opts.localizations_dir)
 
         modelloader.forbid_loaded_nonbuiltin_upscalers()
         modules.scripts.reload_scripts()
+        modules.script_callbacks.model_loaded_callback(shared.sd_model)
         modelloader.load_upscalers()
 
         for module in [module for name, module in sys.modules.items() if name.startswith("modules.ui")]:
