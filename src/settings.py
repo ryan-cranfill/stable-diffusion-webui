@@ -1,12 +1,8 @@
 import os
-import sys
-import json
-import numpy as np
-import SharedArray as sa
 from pathlib import Path
 from PIL import Image
 
-from src.utils import make_shared_mem
+from src.utils import encode_pil_to_base64
 
 TARGET_WIDTH = 512
 TARGET_HEIGHT = 512
@@ -23,63 +19,42 @@ CHECKPOINT_DIR = ROOT_DIR / 'models/Stable-diffusion'
 DEFAULT_IMG_PATH = SRC_DIR / 'garfield.jpg'
 DEFAULT_IMG = Image.open(DEFAULT_IMG_PATH)
 
+# Need to manually remove these keys from the request, because they are not in the processing class
+REMOVE_FROM_REQ_KEYS = ['script_name']
+
 # Use most recent checkpoint
 DEFAULT_CHECKPOINT_PATH = sorted(CHECKPOINT_DIR.glob('*.ckpt'), key=lambda x: os.path.getmtime(x))[-1]
 
-DEFAULT_GENERATION_SETTINGS = {
-    "batch_size": 1,
-    "n_iter": 1,
-    "steps": 20,
-    "cfg_scale": 7.5,
-    "width": TARGET_WIDTH,
-    "height": TARGET_HEIGHT,
-    "resize_mode": 0,
-    "denoising_strength": 0.75,
-    'prompt': 'jon and garfield at the kitchen table by jim davis',
-    "sampler_index": "DPM++ SDE Karras",
-    "seed": -1,
-    "subseed": -1,
-    "subseed_strength": 0,
-    "seed_resize_from_h": -1,
-    "seed_resize_from_w": -1,
+DEFAULT_SHARED_SETTINGS = {
+    'generation_settings': {
+        "batch_size": 1,
+        "n_iter": 1,
+        "steps": 20,
+        "cfg_scale": 7.5,
+        "width": TARGET_WIDTH,
+        "height": TARGET_HEIGHT,
+        "resize_mode": 0,
+        "denoising_strength": 0.75,
+        # 'prompt': 'jon and garfield at the kitchen table by jim davis',
+        "sampler_index": "DPM++ SDE Karras",
+        "seed": -1,
+        "subseed": -1,
+        "subseed_strength": 0,
+        "seed_resize_from_h": -1,
+        "seed_resize_from_w": -1,
+    },
+    'source_img_1': encode_pil_to_base64(DEFAULT_IMG),
+    'source_img_2': encode_pil_to_base64(DEFAULT_IMG),
+    'source_img_3': encode_pil_to_base64(DEFAULT_IMG),
+    'prompt_1': 'jon and garfield at the kitchen table by jim davis',
+    'prompt_2': 'an orange cat wearing a tophat by jim davis',
+    'prompt_3': 'the sun and the stars by jim davis',
+    # When a new initial image or prompt get added, flip this to True
+    # Defaults to true, so that the first time the app is run, it will generate a new image
+    '1_changed': True,
+    '2_changed': True,
+    '3_changed': True,
 }
-
-
-class SharedSettingsManager:
-    def __init__(self, is_client=True, shm_size=1024*10):
-        self.is_client = is_client
-        if not is_client:
-            dummy_arr = np.array([' ' * shm_size])
-            self.shared = make_shared_mem(SHARED_SETTINGS_MEM_NAME, dummy_arr.shape, dtype=dummy_arr.dtype)
-            self.shared[0] = json.dumps(DEFAULT_GENERATION_SETTINGS)
-        else:
-            self.shared = sa.attach(f"shm://{SHARED_SETTINGS_MEM_NAME}")
-
-    def get(self, prop, default=None):
-        settings_dict = json.loads(self.shared[0])
-        return settings_dict.get(prop, default)
-
-    def set(self, prop, value):
-        settings_dict = json.loads(self.shared[0])
-        settings_dict[prop] = value
-        self.shared[0] = json.dumps(settings_dict)
-
-    def __getitem__(self, prop):
-        return self.get(prop)
-
-    def __setitem__(self, prop, value):
-        self.set(prop, value)
-
-    def __contains__(self, prop):
-        return prop in self.get(prop)
-
-    def __del__(self):
-        if not self.is_client:
-            sa.delete(f"shm://{SHARED_SETTINGS_MEM_NAME}")
-
-    def __repr__(self):
-        return f"SharedSettingsManager({json.loads(self.shared[0])})"
-
 
 img2img_params = {
   "init_images": [
