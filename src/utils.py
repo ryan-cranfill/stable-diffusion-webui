@@ -1,9 +1,13 @@
 import io
 import base64
+import time
 from io import BytesIO
 
 import numpy as np
 from PIL import Image, PngImagePlugin
+
+from src.settings import SHM_NAMES
+from src.sharing import SharedDict, SharedMemManager
 
 
 def encode_pil_to_base64(image, as_string=True):
@@ -27,14 +31,36 @@ def encode_pil_to_base64(image, as_string=True):
     return base64.b64encode(bytes_data)
 
 
-def decode_image(encoding):
+def decode_image(encoding) -> Image.Image:
     if isinstance(encoding, str):
         if encoding.startswith("data:image/"):
             encoding = encoding.split(";")[1].split(",")[1]
-        return Image.open(BytesIO(base64.b64decode(encoding)))
+        img = Image.open(BytesIO(base64.b64decode(encoding)))
     elif isinstance(encoding, Image.Image):
-        return encoding
+        img = encoding
     elif isinstance(encoding, np.ndarray):
-        return Image.fromarray(encoding)
+        img = Image.fromarray(encoding)
     else:
         raise TypeError("Unknown type for encoding")
+
+    if img.mode != "RGB":
+        img = img.convert("RGB")
+    return img
+
+
+def connect_to_shared():
+    print('connecting to shared memory...')
+    connected_to_shared = False
+    while not connected_to_shared:
+        try:
+            shared_settings = SharedDict(is_client=True)
+            print('connected to shared settings')
+            shared_mem_manager = SharedMemManager(SHM_NAMES, is_client=True)
+            print('connected to shared memory manager')
+            connected_to_shared = True
+        except Exception as e:
+            print(e)
+            print('Waiting for shared memory to be available and server to start...')
+            time.sleep(1)
+    print('connected to shared memory')
+    return shared_settings, shared_mem_manager

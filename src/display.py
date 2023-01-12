@@ -1,33 +1,33 @@
 import sys
 import cv2
+import time
 import numpy as np
 from PIL import Image
-import SharedArray as sa
 from PyQt6 import QtCore
 from screeninfo import get_monitors
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPixmap, QImage
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel
 
-from src.settings import IMAGE_OPTIONS, TARGET_SIZE
+from src.utils import connect_to_shared
+from src.settings import IMAGE_OPTIONS, TARGET_SIZE, NUM_SCREENS
 
-# IMAGE_OPTIONS = list(Path('/Users/ryan/Downloads/stained-glass-cats/donkey1_upscayled/').glob('*.png'))
-# TEST_IMAGES = [Image.open(img) for img in IMAGE_OPTIONS[:10]]
+shared_settings, shared_mem_manager = connect_to_shared()
 
-monitors = get_monitors()
+
+monitors = get_monitors()[:NUM_SCREENS]
 print('monitors:', monitors)
 
-shared_mems = []
-for i in range(len(monitors)):
-    shared_mems.append(sa.attach(f"shm://img_{i}"))
 
-changes_shared_mem = sa.attach(f"shm://changes")
-
-
-def image_to_pixmap(image: Image.Image, resize_to=None) -> QPixmap:
-    if resize_to is not None:
-        image = image.resize(resize_to)
-    qimage = QImage(np.array(image), image.width, image.height, QImage.Format.Format_RGB888)
+def image_to_pixmap(image: Image.Image | np.ndarray, resize_to=None) -> QPixmap:
+    if isinstance(image, Image.Image):
+        if resize_to is not None:
+            image = image.resize(resize_to)
+        image = np.array(image)
+    elif isinstance(image, np.ndarray):
+        if resize_to is not None and image.shape[:2] != resize_to:
+            image = cv2.resize(image, resize_to)
+    qimage = QImage(image, image.shape[0], image.shape[1], QImage.Format.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
     return pixmap
 
@@ -43,6 +43,7 @@ def array_to_pixmap(image: np.array, resize_to=None) -> QPixmap:
 class App(QWidget):
     def __init__(self, screen=0, fullscreen=True, w=TARGET_SIZE[0], h=TARGET_SIZE[1]):
         super().__init__()
+        self.screen = screen
         self.mon = monitors[screen]
         self.w, self.h = w, h
         self.fullscreen = fullscreen
@@ -54,12 +55,9 @@ class App(QWidget):
         self.timer.start(50)
 
     def update(self):
-        if changes_shared_mem[i] == 1:
-            print('change detected')
-            pixmap = array_to_pixmap(shared_mems[i][:])
-            self.label.setPixmap(pixmap)
-            self.show()
-            changes_shared_mem[i] = 0
+        pixmap = array_to_pixmap(shared_mem_manager[f'img_{self.screen}'])
+        self.label.setPixmap(pixmap)
+        self.show()
 
     def keyPressEvent(self, event):
         key = event.key()

@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from PIL import Image
 
-from src.utils import encode_pil_to_base64
+# from src.utils import encode_pil_to_base64
 
 TARGET_WIDTH = 512
 TARGET_HEIGHT = 512
@@ -21,6 +21,12 @@ DEFAULT_IMG = Image.open(DEFAULT_IMG_PATH)
 
 # Need to manually remove these keys from the request, because they are not in the processing class
 REMOVE_FROM_REQ_KEYS = ['script_name']
+
+# Number of screens to run on
+NUM_SCREENS = 1
+IMG_SHM_NAMES = [f"img_{i}" for i in range(NUM_SCREENS)]
+SRC_IMG_SHM_NAMES = [f"src_img_{i}" for i in range(NUM_SCREENS)]
+SHM_NAMES = IMG_SHM_NAMES + SRC_IMG_SHM_NAMES
 
 # Use most recent checkpoint
 DEFAULT_CHECKPOINT_PATH = sorted(CHECKPOINT_DIR.glob('*.ckpt'), key=lambda x: os.path.getmtime(x))[-1]
@@ -43,17 +49,17 @@ DEFAULT_SHARED_SETTINGS = {
         "seed_resize_from_h": -1,
         "seed_resize_from_w": -1,
     },
-    'source_img_1': encode_pil_to_base64(DEFAULT_IMG),
-    'source_img_2': encode_pil_to_base64(DEFAULT_IMG),
-    'source_img_3': encode_pil_to_base64(DEFAULT_IMG),
-    'prompt_1': 'jon and garfield at the kitchen table by jim davis',
-    'prompt_2': 'an orange cat wearing a tophat by jim davis',
-    'prompt_3': 'the sun and the stars by jim davis',
+    # 'source_img_0': encode_pil_to_base64(DEFAULT_IMG),
+    # 'source_img_1': encode_pil_to_base64(DEFAULT_IMG),
+    # 'source_img_2': encode_pil_to_base64(DEFAULT_IMG),
+    'prompt_0': 'jon and garfield at the kitchen table by jim davis',
+    'prompt_1': 'an orange cat wearing a tophat by jim davis',
+    'prompt_2': 'the sun and the stars by jim davis',
     # When a new initial image or prompt get added, flip this to True
     # Defaults to true, so that the first time the app is run, it will generate a new image
+    '0_changed': True,
     '1_changed': True,
     '2_changed': True,
-    '3_changed': True,
 }
 
 img2img_params = {
