@@ -101,9 +101,5 @@ class SharedDict:
     def __contains__(self, prop):
         return prop in self.get(prop)
 
-    def __del__(self):
-        if not self.is_client:
-            sa.delete(f"shm://{SHARED_SETTINGS_MEM_NAME}")
-
     def __repr__(self):
         return f"SharedDict({json.loads(self.shared[0])})"
