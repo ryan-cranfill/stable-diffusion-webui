@@ -68,6 +68,7 @@ def generate_image(num):
 
 
 if __name__ == '__main__':
+    FRAME_EVERY_N_SECONDS = 5
     print('Loading model....')
     print(shared.refresh_checkpoints())
     sd_models.load_model()
@@ -78,7 +79,14 @@ if __name__ == '__main__':
             print(f'Generating image for screen {i}...')
             start = time.time()
             generate_image(i)
-            print(f'Finished generating image for screen {i} in {time.time() - start} seconds')
+            end = time.time()
+            duration = end - start
+            print(f'Finished generating image for screen {i} in {duration} seconds')
+
+            # Rate limit to not blow up the GPU
+            if duration < FRAME_EVERY_N_SECONDS:
+                time.sleep(FRAME_EVERY_N_SECONDS - duration)
+
 
 
 
