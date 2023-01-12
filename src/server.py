@@ -2,6 +2,7 @@ import io
 import numpy as np
 import uvicorn
 from PIL import Image
+from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, UploadFile, File, Form, Response, WebSocket, WebSocketDisconnect
 
@@ -35,12 +36,20 @@ app.add_middleware(
 )
 
 
+class Img2ImgRequest(BaseModel):
+    for_screen: int
+    image: str | None = None
+    prompt: str | None = None
+
+
 @app.post("/process_img2img")
 async def process_img2img_req(
-        image: UploadFile | str | None = File(default=None),
-        prompt: str | None = Form(default=None),
-        for_screen: int = Form(),
+        data: Img2ImgRequest
 ):
+    for_screen = data.for_screen
+    image = data.image
+    prompt = data.prompt
+
     try:
         if for_screen >= NUM_SCREENS or for_screen < 0:
             return {'success': False, 'message': 'invalid screen number'}

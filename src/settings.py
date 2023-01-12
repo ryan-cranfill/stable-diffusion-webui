@@ -29,7 +29,7 @@ SRC_IMG_SHM_NAMES = [f"src_img_{i}" for i in range(NUM_SCREENS)]
 SHM_NAMES = IMG_SHM_NAMES + SRC_IMG_SHM_NAMES
 
 # Use most recent checkpoint
-DEFAULT_CHECKPOINT_PATH = sorted(CHECKPOINT_DIR.glob('*.ckpt'), key=lambda x: os.path.getmtime(x))[-1]
+# DEFAULT_CHECKPOINT_PATH = sorted(CHECKPOINT_DIR.glob('*.ckpt'), key=lambda x: os.path.getmtime(x))[-1]
 
 DEFAULT_SHARED_SETTINGS = {
     'generation_settings': {
