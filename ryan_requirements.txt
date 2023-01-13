@@ -2,3 +2,4 @@ fastapi_utils
 PyQt6
 screeninfo
 SharedArray
+pyngrok

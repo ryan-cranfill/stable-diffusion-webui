@@ -28,6 +28,8 @@ IMG_SHM_NAMES = [f"img_{i}" for i in range(NUM_SCREENS)]
 SRC_IMG_SHM_NAMES = [f"src_img_{i}" for i in range(NUM_SCREENS)]
 SHM_NAMES = IMG_SHM_NAMES + SRC_IMG_SHM_NAMES
 
+USE_NGROK = os.environ.get("USE_NGROK", "false").lower()[0] == "t"
+
 # Use most recent checkpoint
 # DEFAULT_CHECKPOINT_PATH = sorted(CHECKPOINT_DIR.glob('*.ckpt'), key=lambda x: os.path.getmtime(x))[-1]
 
