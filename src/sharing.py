@@ -6,20 +6,24 @@ import numpy as np
 from src.settings import TARGET_SIZE, SHARED_SETTINGS_MEM_NAME, DEFAULT_SHARED_SETTINGS
 
 
-def make_shared_mem(name, shape, dtype=np.uint8):
+def make_shared_mem(name, shape, dtype=np.uint8, recreate_if_exists=False):
     # Create a shared array, or delete and recreate if it already exists
     try:
         mem = sa.create(f'shm://{name}', shape, dtype=dtype)
     except FileExistsError:
-        print('FileExistsError, deleting and recreating', name)
-        sa.delete(name)
-        mem = sa.create(f'shm://{name}', shape, dtype=dtype)
+        if recreate_if_exists:
+            print('FileExistsError, deleting and recreating', name)
+            sa.delete(name)
+            mem = sa.create(f'shm://{name}', shape, dtype=dtype)
+        else:
+            mem = sa.attach(f'shm://{name}')
     return mem
 
 
 class SharedMemManager:
     # Store several shared memory arrays in a single shared dict
-    def __init__(self, names: list[str] = [], is_client=True, default_shape=TARGET_SIZE + (3,), default_dtype=np.uint8):
+    def __init__(self, names: list[str] = [], is_client=True, default_shape=TARGET_SIZE + (3,), default_dtype=np.uint8,
+                 recreate_if_exists=False):
         self.names = names
         self.default_shape = default_shape
         self.default_dtype = default_dtype
@@ -31,7 +35,7 @@ class SharedMemManager:
                 self.shared_mems[name] = sa.attach(f'shm://{name}')
         else:
             for name in names:
-                self.shared_mems[name] = make_shared_mem(name, default_shape, default_dtype)
+                self.shared_mems[name] = make_shared_mem(name, default_shape, default_dtype, recreate_if_exists)
 
     def add_item(self, name, shape=None, dtype=None):
         if name not in self.names:
@@ -72,13 +76,12 @@ class SharedDict:
     # Only one process can be the "owner" of the shared memory
     # The rest can access it as clients
     def __init__(self, name: str = SHARED_SETTINGS_MEM_NAME, defaults: dict = DEFAULT_SHARED_SETTINGS,
-                 # is_client=True, shm_size=1024*50):
-                 is_client=True, shm_size=int(1e8)):
+                 is_client=True, shm_size=int(1e8), recreate_if_exists=False):
         self.name = name
         self.is_client = is_client
         if not is_client:
             dummy_arr = np.array([' ' * shm_size])
-            self.shared = make_shared_mem(name, dummy_arr.shape, dtype=dummy_arr.dtype)
+            self.shared = make_shared_mem(name, dummy_arr.shape, dtype=dummy_arr.dtype, recreate_if_exists=recreate_if_exists)
             self.shared[0] = json.dumps(defaults)
         else:
             self.shared = sa.attach(f"shm://{name}")

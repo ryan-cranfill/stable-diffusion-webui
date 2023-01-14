@@ -3,3 +3,5 @@ PyQt6
 screeninfo
 SharedArray
 pyngrok
+qrcode
+watchfiles

@@ -18,15 +18,20 @@ CHECKPOINT_DIR = ROOT_DIR / 'models/Stable-diffusion'
 
 DEFAULT_IMG_PATH = SRC_DIR / 'garfield.jpg'
 DEFAULT_IMG = Image.open(DEFAULT_IMG_PATH)
+IMAGE_OPTIONS = [DEFAULT_IMG_PATH] + IMAGE_OPTIONS
 
 # Need to manually remove these keys from the request, because they are not in the processing class
 REMOVE_FROM_REQ_KEYS = ['script_name']
 
 # Number of screens to run on
 NUM_SCREENS = 1
+SCREEN_MAP = {
+    0: 1,
+}
 IMG_SHM_NAMES = [f"img_{i}" for i in range(NUM_SCREENS)]
 SRC_IMG_SHM_NAMES = [f"src_img_{i}" for i in range(NUM_SCREENS)]
-SHM_NAMES = IMG_SHM_NAMES + SRC_IMG_SHM_NAMES
+QR_CODE_SHM_NAMES = [f"qr_code_{i}" for i in range(NUM_SCREENS)]
+SHM_NAMES = IMG_SHM_NAMES + SRC_IMG_SHM_NAMES + QR_CODE_SHM_NAMES
 
 USE_NGROK = os.environ.get("USE_NGROK", "false").lower()[0] == "t"
 

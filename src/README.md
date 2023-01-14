@@ -16,3 +16,4 @@ cd -
 - python -m src.server
 - on mac, python -m src.sd_generator --no-half --use-cpu interrogate
 - python -m src.display
+  - for hot reload, `nodemon --watch src -e py --exec python -m src.display`

@@ -48,19 +48,21 @@ def decode_image(encoding) -> Image.Image:
     return img
 
 
-def connect_to_shared():
-    print('connecting to shared memory...')
+def connect_to_shared(silent=False):
+    print('Connecting to shared memory...') if not silent else None
     connected_to_shared = False
+    shared_settings, shared_mem_manager = None, None
     while not connected_to_shared:
         try:
             shared_settings = SharedDict(is_client=True)
-            print('connected to shared settings')
+            print("Connected to shared settings") if not silent else None
             shared_mem_manager = SharedMemManager(SHM_NAMES, is_client=True)
-            print('connected to shared memory manager')
+            print('connected to shared memory manager') if not silent else None
             connected_to_shared = True
         except Exception as e:
             print(e)
             print('Waiting for shared memory to be available and server to start...')
             time.sleep(1)
-    print('connected to shared memory')
+    print('connected to shared memory') if not silent else None
     return shared_settings, shared_mem_manager
+

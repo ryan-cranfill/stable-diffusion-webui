@@ -3,8 +3,10 @@ import os
 import sys
 import time
 
+import cv2
 import numpy as np
 import uvicorn
+import qrcode
 from PIL import Image
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
@@ -14,15 +16,16 @@ from fastapi import FastAPI, UploadFile, File, Form, Response, WebSocket, WebSoc
 
 from src.utils import decode_image
 from src.sharing import SharedDict, SharedMemManager
-from src.settings import DEFAULT_IMG, NUM_SCREENS, TARGET_SIZE, SHM_NAMES, SRC_IMG_SHM_NAMES, USE_NGROK
+from src.settings import DEFAULT_IMG, NUM_SCREENS, TARGET_SIZE, SHM_NAMES, SRC_IMG_SHM_NAMES, USE_NGROK, QR_CODE_SHM_NAMES
 
 if USE_NGROK:
     # Run this first to ensure no other ngrok processes are running
     os.system("pkill ngrok")
 
 # INITIALIZE SHARED MEMORY
-shared_settings = SharedDict(is_client=False)
-shared_mem_manager = SharedMemManager(SHM_NAMES, is_client=False)
+RECREATE_IF_EXISTS = False  # If we change array sizes or something and need to recreate the shared memory, set this to True
+shared_settings = SharedDict(is_client=False, recreate_if_exists=RECREATE_IF_EXISTS)
+shared_mem_manager = SharedMemManager(SHM_NAMES, is_client=False, recreate_if_exists=RECREATE_IF_EXISTS)
 
 img_template_arr = np.array(DEFAULT_IMG.resize(TARGET_SIZE))
 for name in SRC_IMG_SHM_NAMES:
@@ -45,7 +48,7 @@ app.add_middleware(
 )
 
 
-public_url = None
+public_url = 'http://beefcake.local:5000'
 
 if USE_NGROK:
     # pyngrok should only ever be installed or initialized in a dev environment when this flag is set
@@ -68,6 +71,12 @@ if USE_NGROK:
             time.sleep(1)
             print('trying to connect to ngrok...')
     print("ngrok tunnel \"{}\" -> \"http://127.0.0.1:{}\"".format(public_url, port))
+
+qr_img = qrcode.make(public_url)
+qr_array = np.array(qr_img.resize(TARGET_SIZE))
+qr_array = cv2.cvtColor((np.array(qr_array).astype(np.uint8) * 255), cv2.COLOR_GRAY2RGB)
+for name in QR_CODE_SHM_NAMES:
+    shared_mem_manager[name][:] = qr_array[:]
 
 
 class Img2ImgRequest(BaseModel):

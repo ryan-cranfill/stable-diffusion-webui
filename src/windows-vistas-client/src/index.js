@@ -3,14 +3,10 @@ import axios from "axios";
 import p5 from 'p5';
 import "./import-jquery";
 import select2 from "./lib/select2.min";
-import {Draggable} from "./draggable";
-import {pollockSketch} from "./pollockSketch";
-import {OutputSketch} from "./outputSketch";
-import {clickyShapySketch} from "./clickyShapy";
+import {gridSketch} from "./gridz";
 import {backgroundChoices} from "./choices";
 
-const interactiveSketch = new p5(clickyShapySketch, 'interactiveMount');
-const outputSketch = new p5(OutputSketch, 'outputMount');
+const interactiveSketch = new p5(gridSketch, 'interactiveMount');
 
 // default host should be location of window
 let HOST = window.location.origin
@@ -39,13 +35,11 @@ const dataURLtoFile = (dataurl, filename) => {
 
 document.getElementById('resetButton').addEventListener('click', () => {
   interactiveSketch.resetSketch();
-  // outputSketch.reset();
 })
 
 const saveButton = document.getElementById('saveButton')
 saveButton.addEventListener('click', () => {
   console.log('save button clicked')
-  outputSketch.toggleWaiting()
   // get p5 pixels then post to server
   let imageBase64String = interactiveSketch.saveTemp();
   const prompt = document.getElementById('promptInput').value
@@ -55,17 +49,8 @@ saveButton.addEventListener('click', () => {
   console.log(url)
   axios.post(url, {image: imageBase64String, prompt: prompt, for_screen: 0}
   ).then(response => {
-    const images = response.data.images
-    if (!images) {
-      return
-    }
-
-    for (const imgStr of images) {
-      outputSketch.loadImage(imgStr, img => {
-        outputSketch.image(img, 0, 0)
-      })
-    }
-    outputSketch.toggleWaiting()
+    const changes = response.data
+    console.log(changes)
   })
 })
 
