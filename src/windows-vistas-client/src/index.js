@@ -60,7 +60,9 @@ saveButton.addEventListener('click', () => {
   console.log('save button clicked')
   // get p5 pixels then post to server
   let imageBase64String = interactiveSketch.saveTemp();
-  const prompt = document.getElementById('promptInput').value
+  // const prompt = document.getElementById('promptInput').value
+  let prompt = document.getElementById('subject-select').value
+  prompt = `a beautiful intricate ornate ((stained glass window)) of (((${prompt}))) high quality flickr`
   // const denoisingStrength = document.getElementById('denoising-range').value / 100
   // const passcode = document.getElementById('passcodeInput').value
   const url = `${HOST}process_img2img`

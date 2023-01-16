@@ -25,6 +25,10 @@ export const gridSketch = (p) => {
     randomizeCellColors()
   }
 
+  p.windowResized = () => {
+    p.resizeCanvas(sketchDiv.offsetWidth, sketchDiv.offsetHeight);
+  }
+
   p.draw = () => {
     const cellWidth = p.width / columns;
     const cellHeight = p.height / rows;
@@ -101,8 +105,8 @@ export const gridSketch = (p) => {
   }
 
   p.saveTemp = () => {
-    let c = p.get(0, 0, w, h);
-    saveCanvas.image(c, 0, 0);
+    let c = p.get(0, 0, p.width, p.height);
+    saveCanvas.image(c, 0, 0, w, h);
     return saveCanvas.canvas.toDataURL();
   }
 
@@ -137,11 +141,11 @@ export const gridSketch = (p) => {
   }
 
   function createMetaTag() {
-  let meta = p.createElement('meta');
-  meta.attribute('name', 'viewport');
-  meta.attribute('content', 'user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width,height=device-height');
+    let meta = p.createElement('meta');
+    meta.attribute('name', 'viewport');
+    meta.attribute('content', 'user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width,height=device-height');
 
-  let head = p.select('head');
-  meta.parent(head);
-}
+    let head = p.select('head');
+    meta.parent(head);
+  }
 }

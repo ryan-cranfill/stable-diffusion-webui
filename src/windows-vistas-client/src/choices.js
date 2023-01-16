@@ -14,7 +14,6 @@ backgroundChoices.forEach((choice, index) => {
 })
 
 export const subjectChoices = [
-    'A person',
     'A dog',
     'A cat',
     'A bird',
