@@ -1,7 +1,7 @@
 import io
 import os
 import sys
-# import cv2
+import cv2
 import json
 import time
 import uvicorn
@@ -16,7 +16,7 @@ from fastapi import FastAPI, UploadFile, File, Form, Response, WebSocket, WebSoc
 
 from src.utils import decode_image, make_banner
 from src.sharing import SharedDict, SharedMemManager
-from src.settings import DEFAULT_IMG, NUM_SCREENS, TARGET_SIZE, SHM_NAMES, SRC_IMG_SHM_NAMES, USE_NGROK, QR_CODE_SHM_NAMES, QR_ARR_SHAPE, SHM_SHAPES
+from src.settings import DEFAULT_IMG, NUM_SCREENS, TARGET_SIZE, SHM_NAMES, SRC_IMG_SHM_NAMES, USE_NGROK, QR_CODE_SHM_NAMES, QR_ARR_SHAPE, SHM_SHAPES, IMG_SHM_NAMES
 
 if USE_NGROK:
     # Run this first to ensure no other ngrok processes are running
@@ -132,6 +132,44 @@ async def update_settings(data: dict):
     shared_settings['generation_settings'] = data['generation_settings']
     shared_settings['other_settings'] = data['other_settings']
     return {'status': 'success'}
+
+
+@app.get(
+    '/input_img/{screen_id}',
+    responses={
+        200: {
+            "content": {"image/png": {}}
+        }
+    },
+    response_class=Response,
+)
+async def get_input_img(screen_id: int):
+    if screen_id >= NUM_SCREENS or screen_id < 0:
+        return {'success': False, 'message': 'invalid screen number'}
+
+    is_success, im_buf_arr = cv2.imencode(".png", cv2.cvtColor(shared_mem_manager[SRC_IMG_SHM_NAMES[screen_id]][:], cv2.COLOR_BGR2RGB))
+    byte_im = im_buf_arr.tobytes()
+
+    return Response(content=byte_im, media_type="image/png")
+
+
+@app.get(
+    '/output_img/{screen_id}',
+    responses={
+        200: {
+            "content": {"image/png": {}}
+        }
+    },
+    response_class=Response,
+)
+async def get_output_img(screen_id: int):
+    if screen_id >= NUM_SCREENS or screen_id < 0:
+        return {'success': False, 'message': 'invalid screen number'}
+
+    is_success, im_buf_arr = cv2.imencode(".png", cv2.cvtColor(shared_mem_manager[IMG_SHM_NAMES[screen_id]][:], cv2.COLOR_BGR2RGB))
+    byte_im = im_buf_arr.tobytes()
+
+    return Response(content=byte_im, media_type="image/png")
 
 
 app.mount("/", StaticFiles(directory="src/windows-vistas-client/dist", html=True), name="static")

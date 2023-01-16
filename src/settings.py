@@ -62,6 +62,7 @@ DEFAULT_SHARED_SETTINGS = {
     },
     'other_settings': {
         'frame_every_n_seconds': 10,
+        'num_screens': NUM_SCREENS,
     },
     # 'source_img_0': encode_pil_to_base64(DEFAULT_IMG),
     # 'source_img_1': encode_pil_to_base64(DEFAULT_IMG),

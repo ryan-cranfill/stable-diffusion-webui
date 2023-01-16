@@ -11,6 +11,7 @@ if (HOST.slice(-1) !== "/") {
 const SETTINGS_URL = `${HOST}settings`
 const SETTINGS_EDITOR = document.getElementById('settings-editor')
 const UPDATE_SETTINGS_BUTTON = document.getElementById('update-settings')
+const IMAGE_CONTAINER = document.getElementById('images-container')
 
 UPDATE_SETTINGS_BUTTON.addEventListener('click', () => {
     try {
@@ -24,15 +25,31 @@ UPDATE_SETTINGS_BUTTON.addEventListener('click', () => {
     }
 })
 
-function getSettings() {
-    axios.get(SETTINGS_URL).then((response) => {
+async function getSettings() {
+    return axios.get(SETTINGS_URL).then((response) => {
         console.log(response)
         SETTINGS_EDITOR.innerHTML = JSON.stringify(response.data, null, 4)
+        return response.data
     })
 }
 
-$(document).ready(function() {
+$(document).ready(async function() {
     console.log('lol', SETTINGS_URL)
     // Get settings from settings endpoint
-    getSettings()
+    const settings = await getSettings()
+    console.log(settings)
+    for (let i=0; i<settings.other_settings.num_screens; i++) {
+        const imgContainer = document.createElement('div')
+        imgContainer.classList.add('flex')
+        imgContainer.classList.add('w-3/4')
+        imgContainer.classList.add('mx-6')
+        const inImgElement = document.createElement('img')
+        inImgElement.src = `${HOST}input_img/${i}`
+        imgContainer.appendChild(inImgElement)
+
+        const outImgElement = document.createElement('img')
+        outImgElement.src = `${HOST}output_img/${i}`
+        imgContainer.appendChild(outImgElement)
+        IMAGE_CONTAINER.appendChild(imgContainer)
+    }
 });
