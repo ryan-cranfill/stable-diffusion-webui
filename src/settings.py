@@ -4,10 +4,13 @@ from PIL import Image
 
 # from src.utils import encode_pil_to_base64
 
-TARGET_WIDTH = 512
-TARGET_HEIGHT = 512
+TARGET_WIDTH = 768
+TARGET_HEIGHT = 768
+QR_CODE_HEIGHT = 200
 
 TARGET_SIZE = (TARGET_WIDTH, TARGET_HEIGHT)
+QR_ARR_SHAPE = (QR_CODE_HEIGHT, TARGET_WIDTH, 3)
+TARGET_ARR_SHAPE = (TARGET_HEIGHT, TARGET_WIDTH, 3)
 IMAGE_OPTIONS = list(Path('/Users/ryan/Downloads/stained-glass-cats/donkey1_upscayled/').glob('*.png'))
 SHARED_SETTINGS_MEM_NAME = 'settings'
 
@@ -32,6 +35,7 @@ IMG_SHM_NAMES = [f"img_{i}" for i in range(NUM_SCREENS)]
 SRC_IMG_SHM_NAMES = [f"src_img_{i}" for i in range(NUM_SCREENS)]
 QR_CODE_SHM_NAMES = [f"qr_code_{i}" for i in range(NUM_SCREENS)]
 SHM_NAMES = IMG_SHM_NAMES + SRC_IMG_SHM_NAMES + QR_CODE_SHM_NAMES
+SHM_SHAPES = [TARGET_ARR_SHAPE if not name.startswith('qr') else QR_ARR_SHAPE for name in SHM_NAMES]
 
 USE_NGROK = os.environ.get("USE_NGROK", "false").lower()[0] == "t"
 

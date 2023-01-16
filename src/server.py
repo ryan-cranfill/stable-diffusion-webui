@@ -1,22 +1,21 @@
 import io
 import os
 import sys
+# import cv2
 import time
-
-import cv2
-import numpy as np
 import uvicorn
-import qrcode
-from PIL import Image
+# import qrcode
+import numpy as np
 from pydantic import BaseModel
+from PIL import Image, ImageDraw
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, UploadFile, File, Form, Response, WebSocket, WebSocketDisconnect
 
 
-from src.utils import decode_image
+from src.utils import decode_image, make_banner
 from src.sharing import SharedDict, SharedMemManager
-from src.settings import DEFAULT_IMG, NUM_SCREENS, TARGET_SIZE, SHM_NAMES, SRC_IMG_SHM_NAMES, USE_NGROK, QR_CODE_SHM_NAMES
+from src.settings import DEFAULT_IMG, NUM_SCREENS, TARGET_SIZE, SHM_NAMES, SRC_IMG_SHM_NAMES, USE_NGROK, QR_CODE_SHM_NAMES, QR_ARR_SHAPE, SHM_SHAPES
 
 if USE_NGROK:
     # Run this first to ensure no other ngrok processes are running
@@ -25,7 +24,7 @@ if USE_NGROK:
 # INITIALIZE SHARED MEMORY
 RECREATE_IF_EXISTS = False  # If we change array sizes or something and need to recreate the shared memory, set this to True
 shared_settings = SharedDict(is_client=False, recreate_if_exists=RECREATE_IF_EXISTS)
-shared_mem_manager = SharedMemManager(SHM_NAMES, is_client=False, recreate_if_exists=RECREATE_IF_EXISTS)
+shared_mem_manager = SharedMemManager(SHM_NAMES, is_client=False, shapes=SHM_SHAPES, recreate_if_exists=RECREATE_IF_EXISTS)
 
 img_template_arr = np.array(DEFAULT_IMG.resize(TARGET_SIZE))
 for name in SRC_IMG_SHM_NAMES:
@@ -72,11 +71,10 @@ if USE_NGROK:
             print('trying to connect to ngrok...')
     print("ngrok tunnel \"{}\" -> \"http://127.0.0.1:{}\"".format(public_url, port))
 
-qr_img = qrcode.make(public_url)
-qr_array = np.array(qr_img.resize(TARGET_SIZE))
-qr_array = cv2.cvtColor((np.array(qr_array).astype(np.uint8) * 255), cv2.COLOR_GRAY2RGB)
 for name in QR_CODE_SHM_NAMES:
-    shared_mem_manager[name][:] = qr_array[:]
+    screen_id = int(name.split('_')[-1])
+    url = f'{public_url}?screen={screen_id}'
+    shared_mem_manager[name][:] = np.array(make_banner(url, 'lol'))
 
 
 class Img2ImgRequest(BaseModel):

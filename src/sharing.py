@@ -3,7 +3,7 @@ import json
 import SharedArray as sa
 import numpy as np
 
-from src.settings import TARGET_SIZE, SHARED_SETTINGS_MEM_NAME, DEFAULT_SHARED_SETTINGS
+from src.settings import TARGET_SIZE, SHARED_SETTINGS_MEM_NAME, DEFAULT_SHARED_SETTINGS, TARGET_ARR_SHAPE
 
 
 def make_shared_mem(name, shape, dtype=np.uint8, recreate_if_exists=False):
@@ -22,20 +22,30 @@ def make_shared_mem(name, shape, dtype=np.uint8, recreate_if_exists=False):
 
 class SharedMemManager:
     # Store several shared memory arrays in a single shared dict
-    def __init__(self, names: list[str] = [], is_client=True, default_shape=TARGET_SIZE + (3,), default_dtype=np.uint8,
+    def __init__(self, names: list[str] = [], is_client=True, shapes=None, dtypes=None, default_shape=TARGET_ARR_SHAPE, default_dtype=np.uint8,
                  recreate_if_exists=False):
         self.names = names
         self.default_shape = default_shape
         self.default_dtype = default_dtype
         self.is_client = is_client
         self.shared_mems = {}
+        self.recreate_if_exists = recreate_if_exists
+        self.populate(names, shapes, dtypes)
 
-        if is_client:
+    def populate(self, names: list[str] = None, shapes: list[tuple] = None, dtypes: list[np.dtype] = None):
+        if names is None:
+            names = self.names
+        if shapes is None:
+            shapes = [self.default_shape] * len(names)
+        if dtypes is None:
+            dtypes = [self.default_dtype] * len(names)
+
+        if self.is_client:
             for name in names:
                 self.shared_mems[name] = sa.attach(f'shm://{name}')
         else:
-            for name in names:
-                self.shared_mems[name] = make_shared_mem(name, default_shape, default_dtype, recreate_if_exists)
+            for name, shape, dtype in zip(names, shapes, dtypes):
+                self.shared_mems[name] = make_shared_mem(name, shape, dtype, self.recreate_if_exists)
 
     def add_item(self, name, shape=None, dtype=None):
         if name not in self.names:

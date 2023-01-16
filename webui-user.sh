@@ -11,6 +11,7 @@
 
 # Commandline arguments for webui.py, for example: export COMMANDLINE_ARGS="--medvram --opt-split-attention"
 export COMMANDLINE_ARGS="--ckpt-dir /mnt/storage/sd_models --xformers --listen"
+export DISPLAY=:0
 
 # python3 executable
 #python_cmd="python3"

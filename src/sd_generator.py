@@ -51,7 +51,7 @@ def img2imgapi(img2imgreq: StableDiffusionImg2ImgProcessingAPI) -> Image.Image:
     return processed.images[i]
 
 
-def generate_image(num):
+def generate_image(i):
     req = StableDiffusionImg2ImgProcessingAPI()
     for k, v in shared_settings['generation_settings'].items():
         setattr(req, k, v)
