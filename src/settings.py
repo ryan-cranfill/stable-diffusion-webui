@@ -60,6 +60,9 @@ DEFAULT_SHARED_SETTINGS = {
         "seed_resize_from_h": -1,
         "seed_resize_from_w": -1,
     },
+    'other_settings': {
+        'frame_every_n_seconds': 10,
+    },
     # 'source_img_0': encode_pil_to_base64(DEFAULT_IMG),
     # 'source_img_1': encode_pil_to_base64(DEFAULT_IMG),
     # 'source_img_2': encode_pil_to_base64(DEFAULT_IMG),

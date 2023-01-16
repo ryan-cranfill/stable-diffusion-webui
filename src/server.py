@@ -2,6 +2,7 @@ import io
 import os
 import sys
 # import cv2
+import json
 import time
 import uvicorn
 # import qrcode
@@ -118,6 +119,19 @@ async def process_img2img_req(
     finally:
         if image and not isinstance(image, str):
             image.file.close()
+
+
+@app.get('/settings')
+async def get_settings():
+    return json.loads(shared_settings.shared[0])
+
+
+@app.post('/settings')
+async def update_settings(data: dict):
+    print(data)
+    shared_settings['generation_settings'] = data['generation_settings']
+    shared_settings['other_settings'] = data['other_settings']
+    return {'status': 'success'}
 
 
 app.mount("/", StaticFiles(directory="src/windows-vistas-client/dist", html=True), name="static")
