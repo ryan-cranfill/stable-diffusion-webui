@@ -12,3 +12,19 @@ export const backgroundChoices = [
 backgroundChoices.forEach((choice, index) => {
   choice.id = index;
 })
+
+export const subjectChoices = [
+    'A person',
+    'A dog',
+    'A cat',
+    'A bird',
+    'A fish',
+    'A car',
+    'An onion',
+    'A banana',
+    'A donkey',
+    'Shrek',
+    'A tree',
+    'A house',
+    'James Cameron',
+]

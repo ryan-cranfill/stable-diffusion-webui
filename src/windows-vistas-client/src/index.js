@@ -4,9 +4,27 @@ import p5 from 'p5';
 import "./import-jquery";
 import select2 from "./lib/select2.min";
 import {gridSketch} from "./gridz";
-import {backgroundChoices} from "./choices";
+import {backgroundChoices, subjectChoices} from "./choices";
 
 const interactiveSketch = new p5(gridSketch, 'interactiveMount');
+
+let openInfoModalButton = document.getElementById("whatisthis");
+let modal = document.getElementById("info-modal");
+let closeInfoModalButton = document.getElementById("ok-btn");
+// We want the modal to open when the Open button is clicked
+openInfoModalButton.onclick = function() {
+  modal.style.display = "block";
+}
+// We want the modal to close when the OK button is clicked
+closeInfoModalButton.onclick = function() {
+  modal.style.display = "none";
+}
+// The modal will close when the user clicks anywhere outside the modal
+window.onclick = function(event) {
+  if (event.target === modal) {
+      modal.style.display = "none";
+  }
+}
 
 // default host should be location of window
 let HOST = window.location.origin
@@ -56,12 +74,11 @@ saveButton.addEventListener('click', () => {
 
 $(document).ready(function() {
   select2($);
-  const backgroundSelect = $('#backgroundSelect');
-  backgroundSelect.select2({data: backgroundChoices});
-  backgroundSelect.on('select2:select', function (e) {
+  const subjectSelect = $('#subject-select');
+  subjectSelect.select2({data: subjectChoices});
+  subjectSelect.on('select2:select', function (e) {
     const data = e.params.data;
     console.log(data);
-    interactiveSketch.setBackground(data);
   });
 });
 

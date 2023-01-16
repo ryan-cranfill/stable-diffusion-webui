@@ -5,28 +5,51 @@
         <meta charset="utf-8">
         <link href="./styles.css" rel="stylesheet">
         <link href="./lib/select2.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <!--        <script src="./lib/select2.min.js" type="module"></script>-->
     </head>
     <body>
-        <div id="app" class="rounded-lg px-6 py-8">
-            <h1>WINDOWS VISTAS</h1>
-            <div id="inputs" class="">
-                <button class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded" id="saveButton">DO IT</button>
-                <input type="text" id="promptInput" placeholder="Garfield" value="Garfield">
-                <input type="text" id="passcodeInput" placeholder="" value="">
-                <select id="backgroundSelect" name="background" class="px-36"></select>
-                <button class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded" id="resetButton">RESET</button>
+        <div id="app" class="rounded-lg px-4 py-2 h-screen">
+            <h1 class="dark:text-white text-3xl pb-4">WINDOWS VISTAS <i id="whatisthis" class="fa fa-question-circle" style="font-size:30px"></i></h1>
+            <div id="interactiveMount" class="w-full h-3/4"></div>
 
-                <label for="denoising-range" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Denoising Strength</label>
-                <input id="denoising-range" type="range" value="50" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700">
-
+            <div id="inputs" class="pt-8">
+<!--                <input type="text" id="promptInput" placeholder="Garfield" value="Garfield">-->
+                <button class="bg-transparent hover:bg-blue-300 text-blue-300 font-semibold hover:text-white py-2 px-4 border border-blue-300 hover:border-transparent rounded" id="resetButton">Randomize</button>
+                <select id="subject-select" class="w-2/5"></select>
+                <button class="bg-transparent hover:bg-blue-300 text-blue-300 font-semibold hover:text-white py-2 px-4 border border-blue-300 hover:border-transparent rounded" id="saveButton">Submit</button>
             </div>
-            <div id="sketches" class="flex flex-row px-4">
-                <div id="interactiveMount" class="p-16"></div>
-                <div id="outputMount" class="p-16">
-                    <p id="outputText"></p>
+
+            <!--info modal content-->
+            <div
+                class="fixed hidden inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+                id="info-modal"
+            >
+                <div
+                    class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white"
+                >
+                    <div class="mt-3 text-center">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Instructions</h3>
+                        <div class="mt-2 px-7 py-3">
+                            <p class="text-sm text-gray-500">
+                                TODO: Add instructions here lol
+                            </p>
+                        </div>
+                        <div class="items-center px-4 py-3">
+                            <button
+                                id="ok-btn"
+                                class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300"
+                            >
+                                Got it!
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+
+
+
 
         </div>
         <script src="index.js" type="module"></script>
