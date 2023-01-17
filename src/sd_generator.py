@@ -1,6 +1,13 @@
+import os
+import sys
 import time
+import shlex
 import numpy as np
 from PIL import Image
+
+# Dumb but makes it so we can use webui-user.sh
+commandline_args = os.environ.get('COMMANDLINE_ARGS', "")
+sys.argv += shlex.split(commandline_args)
 
 from webui import shared
 from modules import sd_models
