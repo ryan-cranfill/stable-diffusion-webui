@@ -18,6 +18,8 @@ THIS_FILE = Path(__file__).resolve()
 SRC_DIR = THIS_FILE.parent
 ROOT_DIR = SRC_DIR.parent
 CHECKPOINT_DIR = ROOT_DIR / 'models/Stable-diffusion'
+REALESRGAN_MODEL_DIR = ROOT_DIR / 'models/RealESRGAN'
+REALESRGAN_MODEL_PATH = REALESRGAN_MODEL_DIR / 'RealESRGAN_x4plus_anime_6B.pth'
 
 DEFAULT_IMG_PATH = SRC_DIR / 'garfield.jpg'
 DEFAULT_IMG = Image.open(DEFAULT_IMG_PATH)

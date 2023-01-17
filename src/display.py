@@ -10,41 +10,18 @@ from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPixmap, QImage
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel
 
+from src.upscale import upscale_img
 from src.utils import connect_to_shared
-from src.settings import IMAGE_OPTIONS, TARGET_SIZE, NUM_SCREENS, SCREEN_MAP, DEFAULT_IMG_PATH
+from src.settings import IMAGE_OPTIONS, TARGET_SIZE, NUM_SCREENS, SCREEN_MAP, DEFAULT_IMG_PATH, IMG_SHM_NAMES
 
 shared_settings, shared_mem_manager = connect_to_shared()
 
 
+
 monitors = get_monitors()[:NUM_SCREENS]
 print('monitors:', monitors)
-
-
-def image_to_pixmap(image: Image.Image | np.ndarray, resize_to=None) -> QPixmap:
-    if isinstance(image, Image.Image):
-        if resize_to is not None:
-            image = image.resize(resize_to)
-        image = np.array(image)
-    elif isinstance(image, np.ndarray):
-        if resize_to is not None and image.shape[:2] != resize_to:
-            image = cv2.resize(image, resize_to)
-    qimage = QImage(image, image.shape[0], image.shape[1], QImage.Format.Format_RGB888)
-    pixmap = QPixmap.fromImage(qimage)
-    return pixmap
-
-
-def array_to_pixmap(image, resize_to=None) -> QPixmap:
-    if isinstance(image, list):
-        # print(image[0].shape)
-        image = np.vstack(image)
-        # image = np.concatenate(image, axis=1)
-    # print(image.shape)
-    if resize_to is not None:
-        image = cv2.resize(image, resize_to)
-
-    qimage = QImage(image, image.shape[0], image.shape[1], QImage.Format.Format_RGB888)
-    pixmap = QPixmap.fromImage(qimage)
-    return pixmap
+current_images = {name: np.zeros((*TARGET_SIZE, 3)) for name in IMG_SHM_NAMES}
+display_images = {name: np.zeros((*TARGET_SIZE, 3)) for name in IMG_SHM_NAMES}
 
 
 class App(QWidget):
@@ -57,18 +34,22 @@ class App(QWidget):
         self.imagenumber = 0
         self.label = QLabel(self)
         self.initUI()
+        # self.timer = QTimer()
+        # self.timer.timeout.connect(self.update)
+        # self.timer.start(50)
+        self.name = IMG_SHM_NAMES[screen]
+        # if screen == 0:
         self.timer = QTimer()
-        self.timer.timeout.connect(self.update)
-        self.timer.start(50)
-        if screen == 0:
-            # self.reconnect_timer = QTimer()
-            # reconnect_func = functools.partial(self.reconnect_to_shm, silent=True)
-            # self.reconnect_timer.timeout.connect(reconnect_func)
-            # self.reconnect_timer.start(1000 * 5)
-            pass
+        self.timer.timeout.connect(self.check_for_image_changes)
+        self.timer.start(100)
+        # reconnect_func = functools.partial(self.reconnect_to_shm, silent=True)
+        # self.reconnect_timer.timeout.connect(reconnect_func)
+        # self.reconnect_timer.start(1000 * 5)
+        pass
 
     def update(self):
-        pixmap = self.array_to_pixmap([shared_mem_manager[f'img_{self.screen}'], shared_mem_manager[f'qr_code_{self.screen}']])
+        # pixmap = self.array_to_pixmap([shared_mem_manager[f'img_{self.screen}'], shared_mem_manager[f'qr_code_{self.screen}']])
+        pixmap = self.array_to_pixmap([display_images[self.name], shared_mem_manager[f'qr_code_{self.screen}']])
         # pixmap = self.array_to_pixmap(shared_mem_manager[f'qr_code_{self.screen}'], )
         # pixmap = self.array_to_pixmap(shared_mem_manager[f'img_{self.screen}'])
         self.label.setPixmap(pixmap)
@@ -117,13 +98,23 @@ class App(QWidget):
         shared_settings, shared_mem_manager = connect_to_shared(silent=silent)
 
     def array_to_pixmap(self, image, resize_to=None, rotate=True) -> QPixmap:
+        already_resized = False
         if isinstance(image, list):
+            # If the images aren't all the same size, resize to the largest
+            if resize_to is None:
+                resize_to = (max([img.shape[1] for img in image]), max([img.shape[0] for img in image]))
+            for i, img in enumerate(image):
+                # If the width isn't the same, resize while keeping the same aspect ratio
+                if img.shape[1] != resize_to[0]:
+                    image[i] = cv2.resize(img, (resize_to[0], int(img.shape[0] * resize_to[0] / img.shape[1])))
+                    already_resized = True
+
             image = cv2.vconcat(image)
 
         if rotate:
             image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
-        if resize_to is not None:
+        if resize_to is not None and not already_resized:
             image = cv2.resize(image, resize_to)
         elif self.fullscreen:
             image = cv2.resize(image, (self.mon.width, self.mon.height), interpolation=cv2.INTER_AREA)
@@ -133,6 +124,16 @@ class App(QWidget):
         qimage = QImage(image, w, h, bytes_per_line, QImage.Format.Format_RGB888)
         pixmap = QPixmap.fromImage(qimage)
         return pixmap
+
+    def check_for_image_changes(self):
+        new_image = shared_mem_manager[self.name][:]
+        if not np.array_equal(new_image, current_images[self.name]):
+            current_images[self.name] = new_image.copy()
+            start = time.time()
+            upscaled = upscale_img(new_image)
+            # print('upscaled in', time.time() - start)
+            display_images[self.name] = upscaled
+            self.update()
 
 
 if __name__ == '__main__':
