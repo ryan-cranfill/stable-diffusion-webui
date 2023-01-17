@@ -50,19 +50,23 @@ const dataURLtoFile = (dataurl, filename) => {
 // axios.get('http://localhost:8000/pass').then((response) =>{
 //   document.getElementById('passcodeInput').setAttribute('value', response.data.passcode)
 // })
-
-document.getElementById('resetButton').addEventListener('click', () => {
+const resetButton = document.getElementById('resetButton')
+resetButton.addEventListener('click', () => {
   interactiveSketch.resetSketch();
 })
 
 const saveButton = document.getElementById('saveButton')
 saveButton.addEventListener('click', () => {
   console.log('save button clicked')
+  // Disable save button
+  saveButton.disabled = true;
+  resetButton.disabled = true;
+
   // get p5 pixels then post to server
   let imageBase64String = interactiveSketch.saveTemp();
   // const prompt = document.getElementById('promptInput').value
-  let prompt = document.getElementById('subject-select').value
-  prompt = `a beautiful intricate ornate ((stained glass window)) of (((${prompt}))) high quality flickr`
+  // let prompt = document.getElementById('subject-select').value
+  // prompt = `a beautiful intricate ornate ((stained glass window)) of (((${prompt}))) high quality flickr`
   // const denoisingStrength = document.getElementById('denoising-range').value / 100
   // const passcode = document.getElementById('passcodeInput').value
   const url = `${HOST}process_img2img`
@@ -80,6 +84,14 @@ saveButton.addEventListener('click', () => {
   axios.post(url, {image: imageBase64String, for_screen}).then(response => {
     const changes = response.data
     console.log(changes)
+    saveButton.disabled = false;
+    resetButton.disabled = false;
+    alert('Success! Your stained glass will appear shortly :-D')
+  }).catch(reason => {
+    console.log(reason)
+    alert('Uh oh! Something went wrong, please try again. If the error persists, try refreshing.')
+    saveButton.disabled = false;
+    resetButton.disabled = false;
   })
 })
 
