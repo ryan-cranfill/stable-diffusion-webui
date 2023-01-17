@@ -5,3 +5,4 @@ SharedArray
 pyngrok
 qrcode
 watchfiles
+UltraDict
