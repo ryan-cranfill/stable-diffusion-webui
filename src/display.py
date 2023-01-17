@@ -22,6 +22,7 @@ monitors = get_monitors()[:NUM_SCREENS]
 print('monitors:', monitors)
 current_images = {name: np.zeros((*TARGET_SIZE, 3)) for name in IMG_SHM_NAMES}
 display_images = {name: np.zeros((*TARGET_SIZE, 3)) for name in IMG_SHM_NAMES}
+full_display_images = {name: np.zeros((*TARGET_SIZE, 3)) for name in IMG_SHM_NAMES}
 
 
 class App(QWidget):
@@ -32,13 +33,9 @@ class App(QWidget):
         self.w, self.h = w, h
         self.fullscreen = fullscreen
         self.imagenumber = 0
+        self.name = IMG_SHM_NAMES[screen]
         self.label = QLabel(self)
         self.initUI()
-        # self.timer = QTimer()
-        # self.timer.timeout.connect(self.update)
-        # self.timer.start(50)
-        self.name = IMG_SHM_NAMES[screen]
-        # if screen == 0:
         self.timer = QTimer()
         self.timer.timeout.connect(self.check_for_image_changes)
         self.timer.start(100)
@@ -47,14 +44,22 @@ class App(QWidget):
         # self.reconnect_timer.start(1000 * 5)
         pass
 
-    def update(self):
-        # pixmap = self.array_to_pixmap([shared_mem_manager[f'img_{self.screen}'], shared_mem_manager[f'qr_code_{self.screen}']])
-        pixmap = self.array_to_pixmap([display_images[self.name], shared_mem_manager[f'qr_code_{self.screen}']])
-        # pixmap = self.array_to_pixmap(shared_mem_manager[f'qr_code_{self.screen}'], )
-        # pixmap = self.array_to_pixmap(shared_mem_manager[f'img_{self.screen}'])
+    def update(self, blend_steps=75):
+        resized_new = self.transform_to_screen([display_images[self.name], shared_mem_manager[f'qr_code_{self.screen}']])
+
+        if blend_steps:
+            for i in range(blend_steps):
+                new_img = cv2.addWeighted(resized_new, i / blend_steps, full_display_images[self.name], 1 - i / blend_steps, 0)
+                self.label.setPixmap(self.array_to_pixmap(new_img))
+                self.label.adjustSize()
+                self.repaint()
+                time.sleep(0.01)
+
+        full_display_images[self.name] = resized_new.copy()
+        pixmap = self.array_to_pixmap(resized_new)
         self.label.setPixmap(pixmap)
         self.label.adjustSize()
-        self.show()
+        self.repaint()
 
     def keyPressEvent(self, event):
         key = event.key()
@@ -87,9 +92,11 @@ class App(QWidget):
     def showimage(self, imagenumber):
         label = self.label
         print('imagenumber:', imagenumber)
-        pixmap = QPixmap(str(IMAGE_OPTIONS[imagenumber]))
-        pixmap = pixmap.scaled(self.w, self.h)
-        # pixmap = image_to_pixmap(TEST_IMAGES[imagenumber], resize_to=(self.w, self.h))
+        img_arr = cv2.imread(str(IMAGE_OPTIONS[imagenumber]))
+        img_arr = cv2.cvtColor(img_arr, cv2.COLOR_BGR2RGB)
+        img_arr = self.transform_to_screen(img_arr)
+        full_display_images[self.name] = img_arr.copy()
+        pixmap = self.array_to_pixmap(img_arr)
         label.setPixmap(pixmap)
         self.show()
 
@@ -97,7 +104,7 @@ class App(QWidget):
         global shared_settings, shared_mem_manager
         shared_settings, shared_mem_manager = connect_to_shared(silent=silent)
 
-    def array_to_pixmap(self, image, resize_to=None, rotate=True) -> QPixmap:
+    def transform_to_screen(self, image, resize_to=None, rotate=True) -> np.array:
         already_resized = False
         if isinstance(image, list):
             # If the images aren't all the same size, resize to the largest
@@ -119,6 +126,9 @@ class App(QWidget):
         elif self.fullscreen:
             image = cv2.resize(image, (self.mon.width, self.mon.height), interpolation=cv2.INTER_AREA)
 
+        return image
+
+    def array_to_pixmap(self, image, resize_to=None, rotate=True) -> QPixmap:
         h, w, ch = image.shape
         bytes_per_line = ch * w
         qimage = QImage(image, w, h, bytes_per_line, QImage.Format.Format_RGB888)
