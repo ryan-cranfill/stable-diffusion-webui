@@ -22,8 +22,9 @@ CHECKPOINT_DIR = ROOT_DIR / 'models/Stable-diffusion'
 REALESRGAN_MODEL_DIR = ROOT_DIR / 'models/RealESRGAN'
 REALESRGAN_MODEL_PATH = REALESRGAN_MODEL_DIR / 'RealESRGAN_x4plus_anime_6B.pth'
 
-DEFAULT_IMG_PATH = SRC_DIR / 'garfield.jpg'
-DEFAULT_IMG = Image.open(DEFAULT_IMG_PATH)
+DEFAULT_IMG_PATH = SRC_DIR / 'genericinput.png'
+# DEFAULT_IMG_PATH = SRC_DIR / 'garfield.jpg'
+DEFAULT_IMG = Image.open(DEFAULT_IMG_PATH).convert('RGB')
 IMAGE_OPTIONS = [DEFAULT_IMG_PATH] + IMAGE_OPTIONS
 
 # Need to manually remove these keys from the request, because they are not in the processing class
@@ -73,9 +74,9 @@ DEFAULT_SHARED_SETTINGS = {
     # 'source_img_0': encode_pil_to_base64(DEFAULT_IMG),
     # 'source_img_1': encode_pil_to_base64(DEFAULT_IMG),
     # 'source_img_2': encode_pil_to_base64(DEFAULT_IMG),
-    'prompt_0': 'jon and garfield at the kitchen table by jim davis',
-    'prompt_1': 'an orange cat wearing a tophat by jim davis',
-    'prompt_2': 'the sun and the stars by jim davis',
+    'prompt_0': 'a stained glass window of an onion stainedglassstyle',
+    'prompt_1': 'a stained glass window of a donkey stainedglassstyle',
+    'prompt_2': 'a stained glass window of Shrek stainedglassstyle',
     # When a new initial image or prompt get added, flip this to True
     # Defaults to true, so that the first time the app is run, it will generate a new image
     '0_changed': time.time(),
