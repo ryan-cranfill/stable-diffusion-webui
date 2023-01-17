@@ -1,4 +1,5 @@
-import json
+# import json
+import orjson as json
 
 import SharedArray as sa
 import numpy as np
@@ -97,13 +98,20 @@ class SharedDict:
             self.shared = sa.attach(f"shm://{name}")
 
     def get(self, prop, default=None):
-        items = json.loads(self.shared[0])
+        items = json.loads(str(self.shared[0]))
         return items.get(prop, default)
 
     def set(self, prop, value):
-        items = json.loads(self.shared[0])
+        # print(type(self.shared[0]))
+        items = json.loads(str(self.shared[0]))
         items[prop] = value
         self.shared[0] = json.dumps(items)
+
+    def get_full(self):
+        return json.loads(str(self.shared[0]))
+
+    def set_full(self, dict_):
+        self.shared[0] = json.dumps(dict_)
 
     def __getitem__(self, prop):
         return self.get(prop)

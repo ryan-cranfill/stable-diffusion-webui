@@ -3,12 +3,13 @@ import time
 import qrcode
 import base64
 import numpy as np
+from UltraDict import UltraDict
 from PIL import Image, PngImagePlugin, ImageDraw
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
 from qrcode.image.styles.colormasks import RadialGradiantColorMask, SolidFillColorMask
 
-from src.settings import SHM_NAMES, TARGET_WIDTH, QR_CODE_HEIGHT
+from src.settings import SHM_NAMES, TARGET_WIDTH, QR_CODE_HEIGHT, SHARED_SETTINGS_MEM_NAME
 from src.sharing import SharedDict, SharedMemManager
 
 
@@ -56,7 +57,7 @@ def connect_to_shared(silent=False):
     shared_settings, shared_mem_manager = None, None
     while not connected_to_shared:
         try:
-            shared_settings = SharedDict(is_client=True)
+            shared_settings = UltraDict(name=SHARED_SETTINGS_MEM_NAME, recurse=True)
             print("Connected to shared settings") if not silent else None
             shared_mem_manager = SharedMemManager(SHM_NAMES, is_client=True)
             print('connected to shared memory manager') if not silent else None

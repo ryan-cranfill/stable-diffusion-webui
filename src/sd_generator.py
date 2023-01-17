@@ -58,8 +58,7 @@ def img2imgapi(img2imgreq: StableDiffusionImg2ImgProcessingAPI) -> Image.Image:
     return processed.images[i]
 
 
-def decay_denoising_strength(num_frames_generated: int, decay_rate: float = .05, min_val: float = 0.5) -> float:
-    base_strength = shared_settings['generation_settings']['denoising_strength']
+def decay_denoising_strength(num_frames_generated: int, base_strength: float, decay_rate: float = .05, min_val: float = 0.5) -> float:
     return max(base_strength * np.exp(-decay_rate * num_frames_generated), min_val)
 
 
@@ -70,7 +69,10 @@ def generate_image(i):
     for k, v in shared_settings['generation_settings'].items():
         setattr(req, k, v)
 
-    req.denoising_strength = decay_denoising_strength(shared_settings[f'{i}_num_frames_generated'])
+    req.denoising_strength = decay_denoising_strength(
+        shared_settings[f'{i}_num_frames_generated'],
+        shared_settings['generation_settings']['denoising_strength']
+    )
     # print(req.denoising_strength)
 
     req.init_images = [shared_mem_manager[f'src_img_{i}']]

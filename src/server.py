@@ -7,6 +7,7 @@ import time
 import uvicorn
 # import qrcode
 import numpy as np
+from UltraDict import UltraDict
 from pydantic import BaseModel
 from PIL import Image, ImageDraw
 from fastapi.staticfiles import StaticFiles
@@ -16,7 +17,7 @@ from fastapi import FastAPI, UploadFile, File, Form, Response, WebSocket, WebSoc
 
 from src.utils import decode_image, make_banner
 from src.sharing import SharedDict, SharedMemManager
-from src.settings import DEFAULT_IMG, NUM_SCREENS, TARGET_SIZE, SHM_NAMES, SRC_IMG_SHM_NAMES, USE_NGROK, QR_CODE_SHM_NAMES, QR_ARR_SHAPE, SHM_SHAPES, IMG_SHM_NAMES, CHANGE_TIMESTAMP_NAMES
+from src.settings import DEFAULT_IMG, NUM_SCREENS, TARGET_SIZE, SHM_NAMES, SRC_IMG_SHM_NAMES, USE_NGROK, QR_CODE_SHM_NAMES, QR_ARR_SHAPE, SHM_SHAPES, IMG_SHM_NAMES, CHANGE_TIMESTAMP_NAMES, DEFAULT_SHARED_SETTINGS, SHARED_SETTINGS_MEM_NAME
 
 if USE_NGROK:
     # Run this first to ensure no other ngrok processes are running
@@ -24,7 +25,8 @@ if USE_NGROK:
 
 # INITIALIZE SHARED MEMORY
 RECREATE_IF_EXISTS = False  # If we change array sizes or something and need to recreate the shared memory, set this to True
-shared_settings = SharedDict(is_client=False, recreate_if_exists=RECREATE_IF_EXISTS)
+initial_settings = DEFAULT_SHARED_SETTINGS if RECREATE_IF_EXISTS else None
+shared_settings = UltraDict(initial_settings, name=SHARED_SETTINGS_MEM_NAME, recurse=True, auto_unlink=RECREATE_IF_EXISTS)
 shared_mem_manager = SharedMemManager(SHM_NAMES, is_client=False, shapes=SHM_SHAPES, recreate_if_exists=RECREATE_IF_EXISTS)
 
 img_template_arr = np.array(DEFAULT_IMG.resize(TARGET_SIZE))
