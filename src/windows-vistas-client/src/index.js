@@ -76,8 +76,8 @@ saveButton.addEventListener('click', () => {
                         return values
                       }, {})
   const for_screen = parseInt(queryParams.screen) || 0
-  axios.post(url, {image: imageBase64String, prompt: prompt, for_screen}
-  ).then(response => {
+  // axios.post(url, {image: imageBase64String, prompt: prompt, for_screen}
+  axios.post(url, {image: imageBase64String, for_screen}).then(response => {
     const changes = response.data
     console.log(changes)
   })
