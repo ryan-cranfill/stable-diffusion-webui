@@ -30,7 +30,7 @@ IMAGE_OPTIONS = [DEFAULT_IMG_PATH] + IMAGE_OPTIONS
 REMOVE_FROM_REQ_KEYS = ['script_name']
 
 # Number of screens to run on
-NUM_SCREENS = 1
+NUM_SCREENS = 2
 SCREEN_MAP = {
     0: 1,
 }

@@ -8,7 +8,7 @@ from PyQt6 import QtCore
 from screeninfo import get_monitors
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPixmap, QImage
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QMainWindow
 
 from src.upscale import upscale_img
 from src.utils import connect_to_shared
@@ -17,12 +17,24 @@ from src.settings import IMAGE_OPTIONS, TARGET_SIZE, NUM_SCREENS, SCREEN_MAP, DE
 shared_settings, shared_mem_manager = connect_to_shared()
 
 
-
-monitors = get_monitors()[:NUM_SCREENS]
+monitors = get_monitors()
+monitors = [m for m in monitors if m.name != 'DP-0']
+monitors = monitors[:NUM_SCREENS]
 print('monitors:', monitors)
 current_images = {name: np.zeros((*TARGET_SIZE, 3)) for name in IMG_SHM_NAMES}
 display_images = {name: np.zeros((*TARGET_SIZE, 3)) for name in IMG_SHM_NAMES}
 full_display_images = {name: np.zeros((*TARGET_SIZE, 3)) for name in IMG_SHM_NAMES}
+
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.windows = []
+        for i in range(len(monitors)):
+            print(f'making window {i}')
+            ex = App(screen=i, fullscreen=True)
+            ex.show()
+            self.windows.append(ex)
 
 
 class App(QWidget):
@@ -141,13 +153,13 @@ class App(QWidget):
             current_images[self.name] = new_image.copy()
             start = time.time()
             upscaled = upscale_img(new_image)
-            # print('upscaled in', time.time() - start)
+            print(f'upscaled screen {self.screen} in', time.time() - start)
             display_images[self.name] = upscaled
             self.update()
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    for i in range(len(monitors)):
-        ex = App(screen=i, fullscreen=True)
+    w = MainWindow()
+    w.hide()
     sys.exit(app.exec())

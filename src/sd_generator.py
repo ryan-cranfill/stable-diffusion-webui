@@ -55,7 +55,7 @@ def img2imgapi(img2imgreq: StableDiffusionImg2ImgProcessingAPI) -> Image.Image:
     shared.state.end()
     shared.total_tqdm.clear()  # clear the progress bar
 
-    return processed.images[i]
+    return processed.images[0]
 
 
 def decay_denoising_strength(num_frames_generated: int, base_strength: float, decay_rate: float = .05, min_val: float = 0.5) -> float:
