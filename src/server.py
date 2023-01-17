@@ -24,7 +24,7 @@ if USE_NGROK:
     os.system("pkill ngrok")
 
 # INITIALIZE SHARED MEMORY
-RECREATE_IF_EXISTS = False  # If we change array sizes or something and need to recreate the shared memory, set this to True
+RECREATE_IF_EXISTS = False   # If we change array sizes or something and need to recreate the shared memory, set this to True
 initial_settings = DEFAULT_SHARED_SETTINGS if RECREATE_IF_EXISTS else None
 shared_settings = UltraDict(initial_settings, name=SHARED_SETTINGS_MEM_NAME, recurse=True, auto_unlink=RECREATE_IF_EXISTS)
 shared_mem_manager = SharedMemManager(SHM_NAMES, is_client=False, shapes=SHM_SHAPES, recreate_if_exists=RECREATE_IF_EXISTS)
@@ -133,14 +133,16 @@ async def process_img2img_req(
 
 @app.get('/settings')
 async def get_settings():
-    return json.loads(shared_settings.shared[0])
+    return shared_settings.data
 
 
 @app.post('/settings')
 async def update_settings(data: dict):
     print(data)
-    shared_settings['generation_settings'] = data['generation_settings']
-    shared_settings['other_settings'] = data['other_settings']
+    for k, v in data.get('generation_settings', {}).items():
+        shared_settings['generation_settings'][k] = v
+    for k, v in data.get('other_settings', {}).items():
+        shared_settings['other_settings'][k] = v
     return {'status': 'success'}
 
 

@@ -150,6 +150,7 @@ class App(QWidget):
     def check_for_image_changes(self):
         new_image = shared_mem_manager[self.name][:]
         if not np.array_equal(new_image, current_images[self.name]):
+            print('changing', self.screen)
             current_images[self.name] = new_image.copy()
             start = time.time()
             upscaled = upscale_img(new_image)
