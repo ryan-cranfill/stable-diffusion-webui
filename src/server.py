@@ -31,8 +31,10 @@ img_template_arr = np.array(DEFAULT_IMG.resize(TARGET_SIZE))
 for name in SRC_IMG_SHM_NAMES:
     shared_mem_manager[name][:] = img_template_arr
 
-for name in CHANGE_TIMESTAMP_NAMES:
+for i, name in enumerate(CHANGE_TIMESTAMP_NAMES):
     shared_settings[name] = time.time()
+    shared_settings[f'{i}_last_frame'] = 0
+    shared_settings[f'{i}_num_frames_generated'] = 0
 
 
 app = FastAPI()
@@ -116,6 +118,7 @@ async def process_img2img_req(
             changes['img'] = 1
 
         shared_settings[CHANGE_TIMESTAMP_NAMES[for_screen]] = time.time()
+        shared_settings[f'{for_screen}_num_frames_generated'] = 0
 
         return {'success': True, 'changes': changes}
     except Exception as e:

@@ -58,11 +58,20 @@ def img2imgapi(img2imgreq: StableDiffusionImg2ImgProcessingAPI) -> Image.Image:
     return processed.images[i]
 
 
+def decay_denoising_strength(num_frames_generated: int, decay_rate: float = .05, min_val: float = 0.5) -> float:
+    base_strength = shared_settings['generation_settings']['denoising_strength']
+    return max(base_strength * np.exp(-decay_rate * num_frames_generated), min_val)
+
+
 def generate_image(i):
     start_time = time.time()
+
     req = StableDiffusionImg2ImgProcessingAPI()
     for k, v in shared_settings['generation_settings'].items():
         setattr(req, k, v)
+
+    req.denoising_strength = decay_denoising_strength(shared_settings[f'{i}_num_frames_generated'])
+    # print(req.denoising_strength)
 
     req.init_images = [shared_mem_manager[f'src_img_{i}']]
     req.prompt = shared_settings[f'prompt_{i}']
@@ -73,6 +82,9 @@ def generate_image(i):
 
     out_img = img2imgapi(req)
     shared_mem_manager[f'img_{i}'] = np.array(out_img)
+
+    # shared_settings[f'{i}_last_frame'] = 0
+    shared_settings[f'{i}_num_frames_generated'] += 1
 
     if shared_settings['other_settings'].get('loopback_mode'):
         # Put the generated image back into the source image
