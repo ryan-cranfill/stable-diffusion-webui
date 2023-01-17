@@ -16,7 +16,7 @@ from fastapi import FastAPI, UploadFile, File, Form, Response, WebSocket, WebSoc
 
 from src.utils import decode_image, make_banner
 from src.sharing import SharedDict, SharedMemManager
-from src.settings import DEFAULT_IMG, NUM_SCREENS, TARGET_SIZE, SHM_NAMES, SRC_IMG_SHM_NAMES, USE_NGROK, QR_CODE_SHM_NAMES, QR_ARR_SHAPE, SHM_SHAPES, IMG_SHM_NAMES
+from src.settings import DEFAULT_IMG, NUM_SCREENS, TARGET_SIZE, SHM_NAMES, SRC_IMG_SHM_NAMES, USE_NGROK, QR_CODE_SHM_NAMES, QR_ARR_SHAPE, SHM_SHAPES, IMG_SHM_NAMES, CHANGE_TIMESTAMP_NAMES
 
 if USE_NGROK:
     # Run this first to ensure no other ngrok processes are running
@@ -30,6 +30,9 @@ shared_mem_manager = SharedMemManager(SHM_NAMES, is_client=False, shapes=SHM_SHA
 img_template_arr = np.array(DEFAULT_IMG.resize(TARGET_SIZE))
 for name in SRC_IMG_SHM_NAMES:
     shared_mem_manager[name][:] = img_template_arr
+
+for name in CHANGE_TIMESTAMP_NAMES:
+    shared_settings[name] = time.time()
 
 
 app = FastAPI()
@@ -111,6 +114,8 @@ async def process_img2img_req(
             shared_mem_manager[SRC_IMG_SHM_NAMES[for_screen]][:] = np.array(img)
 
             changes['img'] = 1
+
+        shared_settings[CHANGE_TIMESTAMP_NAMES[for_screen]] = time.time()
 
         return {'success': True, 'changes': changes}
     except Exception as e:

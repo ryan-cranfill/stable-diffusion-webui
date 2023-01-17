@@ -59,6 +59,7 @@ def img2imgapi(img2imgreq: StableDiffusionImg2ImgProcessingAPI) -> Image.Image:
 
 
 def generate_image(i):
+    start_time = time.time()
     req = StableDiffusionImg2ImgProcessingAPI()
     for k, v in shared_settings['generation_settings'].items():
         setattr(req, k, v)
@@ -72,6 +73,14 @@ def generate_image(i):
 
     out_img = img2imgapi(req)
     shared_mem_manager[f'img_{i}'] = np.array(out_img)
+
+    if shared_settings['other_settings'].get('loopback_mode'):
+        # Put the generated image back into the source image
+        # Check that it hasn't changed in the meantime first though
+        if shared_settings[f'{i}_changed'] > start_time:
+            # Input image has changed since generation started, don't overwrite it
+            return
+        shared_mem_manager[f'src_img_{i}'] = np.array(out_img)
 
 
 if __name__ == '__main__':

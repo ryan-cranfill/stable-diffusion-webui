@@ -1,12 +1,13 @@
 import os
+import time
 from pathlib import Path
 from PIL import Image
 
 # from src.utils import encode_pil_to_base64
 
-TARGET_WIDTH = 768
-TARGET_HEIGHT = 768
-QR_CODE_HEIGHT = 200
+TARGET_WIDTH = 512
+TARGET_HEIGHT = 512
+QR_CODE_HEIGHT = 150
 
 TARGET_SIZE = (TARGET_WIDTH, TARGET_HEIGHT)
 QR_ARR_SHAPE = (QR_CODE_HEIGHT, TARGET_WIDTH, 3)
@@ -38,6 +39,7 @@ SRC_IMG_SHM_NAMES = [f"src_img_{i}" for i in range(NUM_SCREENS)]
 QR_CODE_SHM_NAMES = [f"qr_code_{i}" for i in range(NUM_SCREENS)]
 SHM_NAMES = IMG_SHM_NAMES + SRC_IMG_SHM_NAMES + QR_CODE_SHM_NAMES
 SHM_SHAPES = [TARGET_ARR_SHAPE if not name.startswith('qr') else QR_ARR_SHAPE for name in SHM_NAMES]
+CHANGE_TIMESTAMP_NAMES = [f"{i}_changed" for i in range(NUM_SCREENS)]
 
 USE_NGROK = os.environ.get("USE_NGROK", "false").lower()[0] == "t"
 
@@ -49,13 +51,14 @@ DEFAULT_SHARED_SETTINGS = {
         "batch_size": 1,
         "n_iter": 1,
         "steps": 20,
-        "cfg_scale": 7.5,
+        "cfg_scale": 8.5,
         "width": TARGET_WIDTH,
         "height": TARGET_HEIGHT,
         "resize_mode": 0,
         "denoising_strength": 0.75,
         # 'prompt': 'jon and garfield at the kitchen table by jim davis',
-        "sampler_index": "DPM++ SDE Karras",
+        # "sampler_index": "DPM++ SDE Karras",
+        "sampler_index": "Euler a",
         "seed": -1,
         "subseed": -1,
         "subseed_strength": 0,
@@ -63,8 +66,9 @@ DEFAULT_SHARED_SETTINGS = {
         "seed_resize_from_w": -1,
     },
     'other_settings': {
-        'frame_every_n_seconds': 10,
+        'frame_every_n_seconds': 7.5,
         'num_screens': NUM_SCREENS,
+        'loopback_mode': True,
     },
     # 'source_img_0': encode_pil_to_base64(DEFAULT_IMG),
     # 'source_img_1': encode_pil_to_base64(DEFAULT_IMG),
@@ -74,9 +78,9 @@ DEFAULT_SHARED_SETTINGS = {
     'prompt_2': 'the sun and the stars by jim davis',
     # When a new initial image or prompt get added, flip this to True
     # Defaults to true, so that the first time the app is run, it will generate a new image
-    '0_changed': True,
-    '1_changed': True,
-    '2_changed': True,
+    '0_changed': time.time(),
+    '1_changed': time.time(),
+    '2_changed': time.time(),
 }
 
 img2img_params = {
