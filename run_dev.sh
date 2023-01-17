@@ -33,7 +33,7 @@ then
 
   tmux send-keys -t 'window 0' '# Parcel bundler' C-m
   tmux send-keys -t 'window 0' 'cd src/windows-vistas-client' C-m
-  tmux send-keys -t 'window 0' 'rm -rf .parcel-cache dist' C-m
+#  tmux send-keys -t 'window 0' 'rm -rf .parcel-cache dist' C-m
   tmux send-keys -t 'window 0' 'npm start' C-m
   tmux select-pane -t 0
   tmux splitw -v

@@ -10,7 +10,12 @@
 #clone_dir="stable-diffusion-webui"
 
 # Commandline arguments for webui.py, for example: export COMMANDLINE_ARGS="--medvram --opt-split-attention"
-export COMMANDLINE_ARGS="--ckpt-dir /mnt/storage/sd_models --xformers --listen"
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  export COMMANDLINE_ARGS="--ckpt-dir /mnt/storage/sd_models --xformers --listen"
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  # Mac OSX
+  export COMMANDLINE_ARGS="--no-half --use-cpu interrogate"
+fi
 export DISPLAY=:0
 
 # python3 executable

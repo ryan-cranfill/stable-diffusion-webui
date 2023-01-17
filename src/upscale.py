@@ -9,6 +9,8 @@ from realesrgan.archs.srvgg_arch import SRVGGNetCompact
 
 from src.settings import REALESRGAN_MODEL_PATH
 
+is_mac = os.uname().sysname == 'Darwin'
+
 denoise_strength = 0.5
 outscale = 4
 model_path = REALESRGAN_MODEL_PATH
@@ -17,7 +19,7 @@ tile = 0
 tile_pad = 10
 pre_pad = 0
 face_enhance = False
-fp32 = False
+fp32 = True if is_mac else False
 ext = 'auto'
 suffix = ''
 gpu_id = None
