@@ -67,7 +67,16 @@ saveButton.addEventListener('click', () => {
   // const passcode = document.getElementById('passcodeInput').value
   const url = `${HOST}process_img2img`
   console.log(url)
-  axios.post(url, {image: imageBase64String, prompt: prompt, for_screen: 0}
+  const queryParams = decodeURI(window.location.search)
+                      .replace('?', '')
+                      .split('&')
+                      .map(param => param.split('='))
+                      .reduce((values, [ key, value ]) => {
+                        values[ key ] = value
+                        return values
+                      }, {})
+  const for_screen = parseInt(queryParams.screen) || 0
+  axios.post(url, {image: imageBase64String, prompt: prompt, for_screen}
   ).then(response => {
     const changes = response.data
     console.log(changes)
