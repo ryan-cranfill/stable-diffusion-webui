@@ -1,16 +1,23 @@
 // import "./styles.css";
 if (module.hot) {
-  module.hot.accept();
+  module.hot.accept(() => {
+    const parent = document.getElementById('interactiveMount');
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+    interactiveSketch = new p5(gridSketch, 'interactiveMount');
+  });
 }
 
 import axios from "axios";
 import p5 from 'p5';
 import "./import-jquery";
 import select2 from "./lib/select2.min";
-import {gridSketch} from "./gridz";
+// import {gridSketch} from "./gridz";
+import {gridSketch} from "./grid-subdivide";
 import {backgroundChoices, subjectChoices} from "./choices";
 
-const interactiveSketch = new p5(gridSketch, 'interactiveMount');
+let interactiveSketch = new p5(gridSketch, 'interactiveMount');
 
 let openInfoModalButton = document.getElementById("whatisthis");
 let modal = document.getElementById("info-modal");
@@ -57,6 +64,10 @@ const dataURLtoFile = (dataurl, filename) => {
 const resetButton = document.getElementById('resetButton')
 resetButton.addEventListener('click', () => {
   interactiveSketch.resetSketch();
+})
+
+document.getElementById('changeColorsButton').addEventListener('click', () => {
+  interactiveSketch.randomizeColors();
 })
 
 const saveButton = document.getElementById('saveButton')
