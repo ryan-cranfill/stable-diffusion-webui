@@ -28,5 +28,3 @@ if __name__ == '__main__':
         except FileNotFoundError:
             print(f'FileNotFoundError: shm://{name} does not exist')
     print('Done')
-
-    UltraDict.get_memory()
