@@ -13,7 +13,8 @@ from pydantic import BaseModel
 from PIL import Image, ImageDraw
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, UploadFile, File, Form, Response, WebSocket, WebSocketDisconnect
+from UltraDict.Exceptions import AlreadyExists, CannotAttachSharedMemory
+from fastapi import FastAPI, UploadFile, File, Form, Response
 
 
 from src.utils import decode_image, make_banner
@@ -30,6 +31,11 @@ if USE_NGROK:
 # INITIALIZE SHARED MEMORY
 RECREATE_IF_EXISTS = False   # If we change array sizes or something and need to recreate the shared memory, set this to True
 initial_settings = DEFAULT_SHARED_SETTINGS if RECREATE_IF_EXISTS else None
+# check if shared memory exists, if not initial setting should be defaults
+try:
+    UltraDict.get_memory(create=False, name=SHARED_SETTINGS_MEM_NAME)
+except (AlreadyExists, CannotAttachSharedMemory, FileNotFoundError):
+    initial_settings = DEFAULT_SHARED_SETTINGS
 shared_settings = UltraDict(initial_settings, name=SHARED_SETTINGS_MEM_NAME, recurse=True, auto_unlink=RECREATE_IF_EXISTS)
 shared_mem_manager = SharedMemManager(SHM_NAMES, is_client=False, shapes=SHM_SHAPES, recreate_if_exists=RECREATE_IF_EXISTS)
 
