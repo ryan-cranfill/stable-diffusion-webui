@@ -14,6 +14,8 @@ from src.upscale import upscale_img
 from src.utils import connect_to_shared
 from src.settings import IMAGE_OPTIONS, TARGET_SIZE, NUM_SCREENS, SCREEN_MAP, DEFAULT_IMG_PATH, IMG_SHM_NAMES
 
+UPSCALE = True
+
 shared_settings, shared_mem_manager = connect_to_shared()
 
 
@@ -59,7 +61,8 @@ class App(QWidget):
     def update(self, blend_steps=75):
         resized_new = self.transform_to_screen([display_images[self.name], shared_mem_manager[f'qr_code_{self.screen}']])
 
-        if blend_steps:
+        if blend_steps and resized_new.shape == full_display_images[self.name].shape:
+            # print(resized_new.shape, full_display_images[self.name].shape)
             for i in range(blend_steps):
                 new_img = cv2.addWeighted(resized_new, i / blend_steps, full_display_images[self.name], 1 - i / blend_steps, 0)
                 self.label.setPixmap(self.array_to_pixmap(new_img))
@@ -121,7 +124,7 @@ class App(QWidget):
         if isinstance(image, list):
             # If the images aren't all the same size, resize to the largest
             if resize_to is None:
-                resize_to = (max([img.shape[1] for img in image]), max([img.shape[0] for img in image]))
+                resize_to = (max([img.shape[1] for img in image] + [self.mon.x]), max([img.shape[0] for img in image] + [self.mon.y]))
             for i, img in enumerate(image):
                 # If the width isn't the same, resize while keeping the same aspect ratio
                 if img.shape[1] != resize_to[0]:
@@ -153,10 +156,12 @@ class App(QWidget):
             print('changing', self.screen)
             current_images[self.name] = new_image.copy()
             start = time.time()
-            upscaled = upscale_img(new_image)
             print(f'upscaled screen {self.screen} in', time.time() - start)
-            display_images[self.name] = upscaled
-            # display_images[self.name] = new_image
+            if UPSCALE:
+                upscaled = upscale_img(new_image)
+                display_images[self.name] = upscaled
+            else:
+                display_images[self.name] = new_image.copy()
             self.update()
 
 
