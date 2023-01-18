@@ -4,6 +4,7 @@ import sys
 import cv2
 import json
 import time
+import shelve
 import uvicorn
 # import qrcode
 import numpy as np
@@ -17,7 +18,10 @@ from fastapi import FastAPI, UploadFile, File, Form, Response, WebSocket, WebSoc
 
 from src.utils import decode_image, make_banner
 from src.sharing import SharedDict, SharedMemManager
-from src.settings import DEFAULT_IMG, NUM_SCREENS, TARGET_SIZE, SHM_NAMES, SRC_IMG_SHM_NAMES, USE_NGROK, QR_CODE_SHM_NAMES, QR_ARR_SHAPE, SHM_SHAPES, IMG_SHM_NAMES, CHANGE_TIMESTAMP_NAMES, DEFAULT_SHARED_SETTINGS, SHARED_SETTINGS_MEM_NAME
+from src.settings import DEFAULT_IMG, NUM_SCREENS, TARGET_SIZE, SHM_NAMES, SRC_IMG_SHM_NAMES, \
+    USE_NGROK, QR_CODE_SHM_NAMES, QR_ARR_SHAPE, SHM_SHAPES, IMG_SHM_NAMES, \
+    CHANGE_TIMESTAMP_NAMES, DEFAULT_SHARED_SETTINGS, SHARED_SETTINGS_MEM_NAME, \
+    SETTINGS_CACHE_PATH, ROOT_DIR
 
 if USE_NGROK:
     # Run this first to ensure no other ngrok processes are running
@@ -28,6 +32,23 @@ RECREATE_IF_EXISTS = False   # If we change array sizes or something and need to
 initial_settings = DEFAULT_SHARED_SETTINGS if RECREATE_IF_EXISTS else None
 shared_settings = UltraDict(initial_settings, name=SHARED_SETTINGS_MEM_NAME, recurse=True, auto_unlink=RECREATE_IF_EXISTS)
 shared_mem_manager = SharedMemManager(SHM_NAMES, is_client=False, shapes=SHM_SHAPES, recreate_if_exists=RECREATE_IF_EXISTS)
+
+
+def load_settings():
+    if (ROOT_DIR / (SETTINGS_CACHE_PATH + '.db')).exists():
+        with shelve.open(SETTINGS_CACHE_PATH) as db:
+            # print(db.get('settings'))
+            # shared_settings.update(db.get('settings', {}))
+            data = db.get('settings', {})
+            for k, v in data.get('generation_settings', {}).items():
+                shared_settings['generation_settings'][k] = v
+            for k, v in data.get('other_settings', {}).items():
+                shared_settings['other_settings'][k] = v
+    else:
+        print('No settings cache found, using default settings')
+
+
+load_settings()
 
 img_template_arr = np.array(DEFAULT_IMG.resize(TARGET_SIZE))
 for name in SRC_IMG_SHM_NAMES:
@@ -182,6 +203,20 @@ async def get_output_img(screen_id: int):
     byte_im = im_buf_arr.tobytes()
 
     return Response(content=byte_im, media_type="image/png")
+
+
+@app.get('/save_settings')
+async def save_settings():
+    with shelve.open(SETTINGS_CACHE_PATH) as db:
+        db['settings'] = shared_settings.data
+
+    return {'status': 'success'}
+
+
+@app.get('/load_settings')
+async def load_settings_endpoint():
+    load_settings()
+    return {'status': 'success'}
 
 
 app.mount("/", StaticFiles(directory="src/windows-vistas-client/dist", html=True), name="static")

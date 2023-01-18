@@ -2,8 +2,8 @@ import axios from "axios";
 import "./import-jquery";
 
 // default host should be location of window
-// let HOST = window.location.origin
-let HOST = 'http://beefcake.local:5000'
+let HOST = window.location.origin
+// let HOST = 'http://beefcake.local:5000'
 // Add trailing slash if it's not there already
 if (HOST.slice(-1) !== "/") {
     HOST += "/"
@@ -11,14 +11,37 @@ if (HOST.slice(-1) !== "/") {
 const SETTINGS_URL = `${HOST}settings`
 const SETTINGS_EDITOR = document.getElementById('settings-editor')
 const UPDATE_SETTINGS_BUTTON = document.getElementById('update-settings')
+const SAVE_SETTINGS_BUTTON = document.getElementById('save-settings')
+const LOAD_SETTINGS_BUTTON = document.getElementById('load-settings')
 const IMAGE_CONTAINER = document.getElementById('images-container')
 
 UPDATE_SETTINGS_BUTTON.addEventListener('click', () => {
     try {
         const data = JSON.parse(SETTINGS_EDITOR.value)
-        axios.post(SETTINGS_URL, data).then(response => {
+        axios.post(SETTINGS_URL, data).then(async response => {
+            await getSettings()
             alert(response.data.status)
-            getSettings()
+        })
+    } catch (e) {
+        alert(e)
+    }
+})
+
+SAVE_SETTINGS_BUTTON.addEventListener('click', () => {
+    try {
+        axios.get(`${HOST}save_settings`).then(response => {
+            alert(response.data.status)
+        })
+    } catch (e) {
+        alert(e)
+    }
+})
+
+LOAD_SETTINGS_BUTTON.addEventListener('click', () => {
+    try {
+        axios.get(`${HOST}load_settings`).then(async response => {
+            await getSettings()
+            alert(response.data.status)
         })
     } catch (e) {
         alert(e)

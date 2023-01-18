@@ -156,6 +156,7 @@ class App(QWidget):
             upscaled = upscale_img(new_image)
             print(f'upscaled screen {self.screen} in', time.time() - start)
             display_images[self.name] = upscaled
+            # display_images[self.name] = new_image
             self.update()
 
 
