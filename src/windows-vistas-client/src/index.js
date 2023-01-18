@@ -1,4 +1,8 @@
 // import "./styles.css";
+if (module.hot) {
+  module.hot.accept();
+}
+
 import axios from "axios";
 import p5 from 'p5';
 import "./import-jquery";
