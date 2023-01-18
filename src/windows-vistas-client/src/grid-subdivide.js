@@ -42,29 +42,6 @@ export const gridSketch = (p) => {
     gridSpacingX = (wx - padding*2)/gridDivsX;
     gridSpacingY = (wy - padding*2)/gridDivsY;
 
-    // bools = [];
-    // for(let x = 0; x<gridDivsX; x++){
-    //   let column = [];
-    //   for(let y = 0; y<gridDivsY; y++){
-    //     column.push(1);
-    //   }
-    //   bools.push(column);
-    // }
-    //
-    // rectInfo = [];
-    // rectInfoMap = new Map();
-    // for(let x = 0; x<gridDivsX; x++){
-    //     rectInfoMap[x] = new Map();
-    //     for(let y = 0; y<gridDivsY; y++){
-    //       rectInfoMap[x][y] = null;
-    //     }
-    // }
-    // // constructIrregularGrid([2,3,4,5,6,7,8], [2,3,4,5,6,7,8]);
-    // constructIrregularGrid([2,3,4], [2,3,4]);
-    // constructIrregularGrid([1,2], [2]);
-    // constructIrregularGrid([1], [1]);
-    // console.log(rectInfoMap)
-    // console.log(rectInfo)
     constructGeometry();
     p.background(0);
     p.stroke(0)
@@ -100,8 +77,8 @@ export const gridSketch = (p) => {
         }
     }
     // constructIrregularGrid([2,3,4,5,6,7,8], [2,3,4,5,6,7,8]);
-    constructIrregularGrid([2,3,4], [2,3,4]);
-    constructIrregularGrid([1,2], [2]);
+    constructIrregularGrid([1,2,2,3,3,4], [1,2,2,3,3,4]);
+    constructIrregularGrid([1,1,2], [1,2,3]);
     constructIrregularGrid([1], [1]);
   }
 
