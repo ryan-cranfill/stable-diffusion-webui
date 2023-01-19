@@ -73,6 +73,9 @@ DEFAULT_SHARED_SETTINGS = {
         'num_screens': NUM_SCREENS,
         'loopback_mode': True,
         'max_generations': 25,  # maximum number of generations to run for a source; when hit, use the original input
+        'rotation_screen_0': 0.,
+        'rotation_screen_1': 0.,
+        'rotation_screen_2': 0.,
     },
     # 'source_img_0': encode_pil_to_base64(DEFAULT_IMG),
     # 'source_img_1': encode_pil_to_base64(DEFAULT_IMG),

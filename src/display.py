@@ -6,6 +6,7 @@ import functools
 import numpy as np
 from PIL import Image
 from PyQt6 import QtCore
+from scipy import ndimage
 from screeninfo import get_monitors
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPixmap, QImage
@@ -137,6 +138,10 @@ class App(QWidget):
 
         if rotate:
             image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+
+        rotation_adjustment = shared_settings.get('other_settings', {}).get(f'rotation_screen_{self.screen}')
+        if rotation_adjustment:
+            image = ndimage.rotate(image, rotation_adjustment, reshape=False,)
 
         if resize_to is not None and not already_resized:
             image = cv2.resize(image, resize_to)
