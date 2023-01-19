@@ -99,7 +99,7 @@ if USE_NGROK:
 
     while not public_url:
         try:
-            public_url = ngrok.connect(port).public_url
+            public_url = ngrok.connect(port, bind_tls=True).public_url
         except PyngrokNgrokError:
             # kill ngrok process and retry if it's already running
             os.system("pkill ngrok")
