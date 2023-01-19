@@ -17,8 +17,6 @@ import select2 from "./lib/select2.min";
 import {gridSketch} from "./grid-subdivide";
 import {backgroundChoices, subjectChoices} from "./choices";
 
-console.log('Server URL is:', serverUrl)
-
 let interactiveSketch = new p5(gridSketch, 'interactiveMount');
 
 let openInfoModalButton = document.getElementById("whatisthis");
@@ -40,25 +38,12 @@ window.onclick = function(event) {
 }
 
 // default host should be location of window
-let HOST = window.location.origin
+let HOST = serverUrl || window.location.origin
 // Add trailing slash if it's not there already
 if (HOST.slice(-1) !== "/") {
   HOST += "/"
 }
-
-// helper function: generate a new file from base64 String
-const dataURLtoFile = (dataurl, filename) => {
-  const arr = dataurl.split(',')
-  const mime = arr[0].match(/:(.*?);/)[1]
-  const bstr = atob(arr[1])
-  let n = bstr.length
-  const u8arr = new Uint8Array(n)
-  while (n) {
-    u8arr[n - 1] = bstr.charCodeAt(n - 1)
-    n -= 1 // to make eslint happy
-  }
-  return new File([u8arr], filename, { type: mime })
-}
+console.log('Server URL is:', serverUrl, 'Host URL is:', HOST)
 
 // axios.get('http://localhost:8000/pass').then((response) =>{
 //   document.getElementById('passcodeInput').setAttribute('value', response.data.passcode)
