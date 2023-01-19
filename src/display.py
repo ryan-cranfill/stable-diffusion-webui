@@ -59,8 +59,8 @@ class App(QWidget):
         pass
 
     def update(self, blend_steps=75):
-        resized_new = self.transform_to_screen([display_images[self.name], shared_mem_manager[f'qr_code_{self.screen}']])
-
+#        resized_new = self.transform_to_screen([display_images[self.name], shared_mem_manager[f'qr_code_{self.screen}']])
+        resized_new = self.transform_to_screen(display_images[self.name])
         if blend_steps and resized_new.shape == full_display_images[self.name].shape:
             # print(resized_new.shape, full_display_images[self.name].shape)
             for i in range(blend_steps):

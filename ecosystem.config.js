@@ -11,11 +11,15 @@ module.exports = {
     {
       name   : "display",
       script : "./venv/bin/python -m src.display",
+      env: {
+        "DISPLAY": ":0",
+      },
+      listen_timeout: 30000,
     },
     {
       name   : "generator",
       script : "source webui-user.sh && ./venv/bin/python -m src.sd_generator",
-    }
+    },
   ]
 }
 // module.exports = {
