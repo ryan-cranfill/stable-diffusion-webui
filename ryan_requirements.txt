@@ -6,3 +6,4 @@ pyngrok
 qrcode
 watchfiles
 UltraDict
+python-dotenv
