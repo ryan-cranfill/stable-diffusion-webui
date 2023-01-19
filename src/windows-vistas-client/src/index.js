@@ -17,6 +17,8 @@ import select2 from "./lib/select2.min";
 import {gridSketch} from "./grid-subdivide";
 import {backgroundChoices, subjectChoices} from "./choices";
 
+console.log('Server URL is:', serverUrl)
+
 let interactiveSketch = new p5(gridSketch, 'interactiveMount');
 
 let openInfoModalButton = document.getElementById("whatisthis");

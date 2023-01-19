@@ -254,11 +254,11 @@ export const gridSketch = (p) => {
   }
 
   function createMetaTag() {
-    let meta = p.createElement('meta');
-    meta.attribute('name', 'viewport');
-    meta.attribute('content', 'user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width,height=device-height');
-
-    let head = p.select('head');
-    meta.parent(head);
+    // let meta = p.createElement('meta');
+    // meta.attribute('name', 'viewport');
+    // meta.attribute('content', 'user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width,height=device-height');
+    //
+    // let head = p.select('head');
+    // meta.parent(head);
   }
 }

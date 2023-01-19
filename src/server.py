@@ -17,6 +17,7 @@ from UltraDict.Exceptions import AlreadyExists, CannotAttachSharedMemory
 from fastapi import FastAPI, UploadFile, File, Form, Response
 
 
+from src.netlify import update_server_url
 from src.utils import decode_image, make_banner
 from src.sharing import SharedDict, SharedMemManager
 from src.settings import DEFAULT_IMG, NUM_SCREENS, TARGET_SIZE, SHM_NAMES, SRC_IMG_SHM_NAMES, \
@@ -105,6 +106,8 @@ if USE_NGROK:
             time.sleep(1)
             print('trying to connect to ngrok...')
     print("ngrok tunnel \"{}\" -> \"http://127.0.0.1:{}\"".format(public_url, port))
+
+update_server_url(public_url, snippet_id=0)
 
 for name in QR_CODE_SHM_NAMES:
     screen_id = int(name.split('_')[-1])
