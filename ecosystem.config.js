@@ -6,19 +6,19 @@ module.exports = {
   apps : [
     {
       name   : "server",
-      script : "./venv/bin/python -m src.server",
+      script : "./venv/bin/python -u -m src.server",
     },
     {
       name   : "display",
-      script : "./venv/bin/python -m src.display",
+      script : "./venv/bin/python -u -m src.display",
       env: {
         "DISPLAY": ":0",
       },
-      listen_timeout: 30000,
+      // listen_timeout: 30000,
     },
     {
       name   : "generator",
-      script : "source webui-user.sh && ./venv/bin/python -m src.sd_generator",
+      script : "source webui-user.sh && ./venv/bin/python -u -m src.sd_generator",
     },
   ]
 }

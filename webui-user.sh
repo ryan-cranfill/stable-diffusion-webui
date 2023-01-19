@@ -11,7 +11,7 @@
 
 # Commandline arguments for webui.py, for example: export COMMANDLINE_ARGS="--medvram --opt-split-attention"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  export COMMANDLINE_ARGS="--ckpt-dir /mnt/storage/sd_models --xformers --listen"
+  export COMMANDLINE_ARGS="--ckpt-dir /mnt/storage/sd_models --xformers --listen --disable-console-progressbars"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   # Mac OSX
   export COMMANDLINE_ARGS="--no-half --use-cpu interrogate"
