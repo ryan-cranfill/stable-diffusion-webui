@@ -38,8 +38,9 @@ SCREEN_MAP = {
 }
 IMG_SHM_NAMES = [f"img_{i}" for i in range(NUM_SCREENS)]
 SRC_IMG_SHM_NAMES = [f"src_img_{i}" for i in range(NUM_SCREENS)]
+ORIG_SRC_IMG_SHM_NAMES = [f"orig_src_img_{i}" for i in range(NUM_SCREENS)]
 QR_CODE_SHM_NAMES = [f"qr_code_{i}" for i in range(NUM_SCREENS)]
-SHM_NAMES = IMG_SHM_NAMES + SRC_IMG_SHM_NAMES + QR_CODE_SHM_NAMES
+SHM_NAMES = IMG_SHM_NAMES + SRC_IMG_SHM_NAMES + QR_CODE_SHM_NAMES + ORIG_SRC_IMG_SHM_NAMES
 SHM_SHAPES = [TARGET_ARR_SHAPE if not name.startswith('qr') else QR_ARR_SHAPE for name in SHM_NAMES]
 CHANGE_TIMESTAMP_NAMES = [f"{i}_changed" for i in range(NUM_SCREENS)]
 
@@ -71,6 +72,7 @@ DEFAULT_SHARED_SETTINGS = {
         'frame_every_n_seconds': 7.5,
         'num_screens': NUM_SCREENS,
         'loopback_mode': True,
+        'max_generations': 25,  # maximum number of generations to run for a source; when hit, use the original input
     },
     # 'source_img_0': encode_pil_to_base64(DEFAULT_IMG),
     # 'source_img_1': encode_pil_to_base64(DEFAULT_IMG),

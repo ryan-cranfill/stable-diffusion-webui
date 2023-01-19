@@ -23,7 +23,7 @@ from src.sharing import SharedDict, SharedMemManager
 from src.settings import DEFAULT_IMG, NUM_SCREENS, TARGET_SIZE, SHM_NAMES, SRC_IMG_SHM_NAMES, \
     USE_NGROK, QR_CODE_SHM_NAMES, QR_ARR_SHAPE, SHM_SHAPES, IMG_SHM_NAMES, \
     CHANGE_TIMESTAMP_NAMES, DEFAULT_SHARED_SETTINGS, SHARED_SETTINGS_MEM_NAME, \
-    SETTINGS_CACHE_PATH, ROOT_DIR
+    SETTINGS_CACHE_PATH, ROOT_DIR, ORIG_SRC_IMG_SHM_NAMES
 
 if USE_NGROK:
     # Run this first to ensure no other ngrok processes are running
@@ -58,7 +58,7 @@ def load_settings():
 load_settings()
 
 img_template_arr = np.array(DEFAULT_IMG.resize(TARGET_SIZE))
-for name in SRC_IMG_SHM_NAMES:
+for name in SRC_IMG_SHM_NAMES + ORIG_SRC_IMG_SHM_NAMES:
     shared_mem_manager[name][:] = img_template_arr
 
 for i, name in enumerate(CHANGE_TIMESTAMP_NAMES):
@@ -146,6 +146,7 @@ async def process_img2img_req(
             if img.size != TARGET_SIZE:
                 img = img.resize(TARGET_SIZE)
             shared_mem_manager[SRC_IMG_SHM_NAMES[for_screen]][:] = np.array(img)
+            shared_mem_manager[ORIG_SRC_IMG_SHM_NAMES[for_screen]][:] = np.array(img)
 
             changes['img'] = 1
 

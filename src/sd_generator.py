@@ -94,6 +94,12 @@ def generate_image(i):
         if shared_settings[f'{i}_changed'] > start_time:
             # Input image has changed since generation started, don't overwrite it
             return
+        if shared_settings[f'{i}_num_frames_generated'] > shared_settings.get('other_settings', {}).get('max_generations', 9999):
+            print('resetting to original source image for', i)
+            shared_settings[f'{i}_num_frames_generated'] = 0
+            shared_settings[f'{i}_changed'] = time.time()
+            shared_mem_manager[f'src_img_{i}'] = shared_mem_manager[f"orig_src_img_{i}"]
+            return
         shared_mem_manager[f'src_img_{i}'] = np.array(out_img)
 
 
