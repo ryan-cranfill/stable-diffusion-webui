@@ -1,6 +1,7 @@
 import sys
 import cv2
 import time
+import signal
 import functools
 import numpy as np
 from PIL import Image
@@ -18,6 +19,7 @@ UPSCALE = True
 
 shared_settings, shared_mem_manager = connect_to_shared()
 
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 monitors = get_monitors()
 monitors = [m for m in monitors if m.name != 'DP-0']
@@ -169,4 +171,8 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     w = MainWindow()
     w.hide()
-    sys.exit(app.exec())
+    try:
+        sys.exit(app.exec())
+    except KeyboardInterrupt:
+        print('got keyboard interrupt')
+        app.quit()
