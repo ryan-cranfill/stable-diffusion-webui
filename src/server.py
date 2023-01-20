@@ -245,5 +245,5 @@ app.mount("/", StaticFiles(directory="src/windows-vistas-client/dist", html=True
 
 
 if __name__ == '__main__':
-    uvicorn.run('__main__:app', host="0.0.0.0", port=5000, reload=True, reload_excludes='windows-vistas-client/*')
+    uvicorn.run('__main__:app', host="0.0.0.0", port=5000, reload=not USE_NGROK, reload_excludes='windows-vistas-client/*')
     # uvicorn.run('__main__:app', host="0.0.0.0", port=5000, reload=not USE_NGROK)

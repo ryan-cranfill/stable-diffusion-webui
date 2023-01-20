@@ -6,19 +6,28 @@ module.exports = {
   apps : [
     {
       name   : "server",
-      script : "./venv/bin/python -u -m src.server",
+      script : "./venv/bin/python -m src.reset_shm && ./venv/bin/python -u -m src.server",
+      env: {
+        "USE_NGROK": "true",
+        "NUM_MONITORS": 3,
+      }
     },
     {
       name   : "display",
       script : "./venv/bin/python -u -m src.display",
       env: {
         "DISPLAY": ":0",
+        "NUM_MONITORS": 3,
       },
       // listen_timeout: 30000,
     },
     {
       name   : "generator",
       script : "source webui-user.sh && ./venv/bin/python -u -m src.sd_generator",
+      env: {
+        "USE_NGROK": "true",
+        "NUM_MONITORS": 3,
+      }
     },
   ]
 }

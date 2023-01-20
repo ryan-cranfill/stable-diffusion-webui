@@ -138,7 +138,8 @@ class App(QWidget):
 
     def initUI(self):
         print(self.mon)
-        self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
+        self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint | QtCore.Qt.WindowType.WindowStaysOnTopHint | QtCore.Qt.WindowType.WindowDoesNotAcceptFocus)
+        self.setCursor(Qt.CursorShape.BlankCursor)
         self.move(self.mon.x, 0)
         # self.setGeometry(self.mon.x, self.mon.y, self.w, self.h)
         self.showimage(0)

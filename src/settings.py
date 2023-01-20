@@ -33,7 +33,7 @@ SETTINGS_CACHE_PATH = 'settings_cache'
 REMOVE_FROM_REQ_KEYS = ['script_name']
 
 # Number of screens to run on
-NUM_SCREENS = 1
+NUM_SCREENS = int(os.getenv('NUM_MONITORS')) or 1
 SCREEN_MAP = {
     0: 1,
 }
