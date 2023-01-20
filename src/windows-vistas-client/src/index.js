@@ -83,6 +83,46 @@ function setLastSubmissionTime() {
     localStorage.setItem('windowVistasLastSubmissionTime', Date.now())
 }
 
+const minDistanceFromWindow = 500 // meters
+
+function getDistanceFromLatLonInM(lat1,lon1,lat2,lon2) {
+    var R = 6371; // Radius of the earth in km
+    var dLat = deg2rad(lat2-lat1);  // deg2rad below
+    var dLon = deg2rad(lon2-lon1);
+    var a =
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon/2) * Math.sin(dLon/2)
+        ;
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var d = R * c; // Distance in km
+    return d * 1000;
+}
+
+const agencyLat = 41.9607952273792,
+    agencyLon = -87.72299139718032;
+
+function deg2rad(deg) {
+    return deg * (Math.PI/180)
+}
+function checkGeolocationCloseEnough() {
+    if (navigator.geolocation) {
+        return navigator.geolocation.getCurrentPosition((position) => {
+            console.log('position', position)
+            const lat = position.coords.latitude
+            const lon = position.coords.longitude
+            const distance = getDistanceFromLatLonInM(lat, lon, agencyLat, agencyLon)
+            return distance < minDistanceFromWindow;
+        }, (error) => {
+            console.log('error', error)
+            return false;
+        })
+    } else {
+        // Geolocation is not supported by this browser.
+        return false
+    }
+}
+
 document.getElementById('changeColorsButton').addEventListener('click', () => {
   interactiveSketch.randomizeColors();
 })
@@ -94,6 +134,10 @@ saveButton.addEventListener('click', () => {
         alert('You have already submitted a window recently. Please wait a bit before submitting again.')
         return
     }
+    // if (!checkGeolocationCloseEnough()) {
+    //     alert('You must be within 500 meters of the windows to submit.')
+    //     return
+    // }
     // Disable save button
     saveButton.disabled = true;
     resetButton.disabled = true;
@@ -121,7 +165,7 @@ saveButton.addEventListener('click', () => {
         setLastSubmissionTime()
     }).catch(reason => {
         console.log(reason)
-        alert('Uh oh! Something went wrong, please try again. If the error persists, try refreshing.')
+        alert('Uh oh! Something went wrong, please wait a few seconds and try again. If the error persists, try refreshing.')
         saveButton.disabled = false;
         resetButton.disabled = false;
     })
