@@ -5,7 +5,7 @@ from PIL import Image
 
 # from src.utils import encode_pil_to_base64
 
-TARGET_WIDTH = 512
+TARGET_WIDTH = 320
 TARGET_HEIGHT = 512
 QR_CODE_HEIGHT = 150
 
@@ -22,7 +22,8 @@ CHECKPOINT_DIR = ROOT_DIR / 'models/Stable-diffusion'
 REALESRGAN_MODEL_DIR = ROOT_DIR / 'models/RealESRGAN'
 REALESRGAN_MODEL_PATH = REALESRGAN_MODEL_DIR / 'RealESRGAN_x4plus_anime_6B.pth'
 
-DEFAULT_IMG_PATH = SRC_DIR / 'genericinput.png'
+# DEFAULT_IMG_PATH = SRC_DIR / 'genericinput.png'
+DEFAULT_IMG_PATH = SRC_DIR / 'windows-vistas-text-sideways.png'
 # DEFAULT_IMG_PATH = SRC_DIR / 'garfield.jpg'
 DEFAULT_IMG = Image.open(DEFAULT_IMG_PATH).convert('RGB')
 IMAGE_OPTIONS = [DEFAULT_IMG_PATH] + IMAGE_OPTIONS
