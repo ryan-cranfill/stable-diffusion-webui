@@ -15,6 +15,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from UltraDict.Exceptions import AlreadyExists, CannotAttachSharedMemory
 from fastapi import FastAPI, UploadFile, File, Form, Response
+from slowapi.errors import RateLimitExceeded
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
 
 
 from src.netlify import update_server_url
@@ -66,8 +69,10 @@ for i, name in enumerate(CHANGE_TIMESTAMP_NAMES):
     shared_settings[f'{i}_last_frame'] = 0
     shared_settings[f'{i}_num_frames_generated'] = 0
 
-
+# limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
+# app.state.limiter = limiter
+# app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 origins = [
     "*",
@@ -122,6 +127,7 @@ class Img2ImgRequest(BaseModel):
 
 
 @app.post("/process_img2img")
+# @limiter.limit("1/minute")
 async def process_img2img_req(
         data: Img2ImgRequest
 ):
