@@ -154,9 +154,13 @@ saveButton.addEventListener('click', () => {
                         values[ key ] = value
                         return values
                       }, {})
-    const for_screen = parseInt(queryParams.screen) || 0
+    const data = {image: imageBase64String}
+    const for_screen = parseInt(queryParams.screen)
+    if (for_screen) {
+        data.for_screen = for_screen
+    }
     // axios.post(url, {image: imageBase64String, prompt: prompt, for_screen}
-    axios.post(url, {image: imageBase64String, for_screen}).then(response => {
+    axios.post(url, data).then(response => {
         const changes = response.data
         console.log(changes)
         saveButton.disabled = false;

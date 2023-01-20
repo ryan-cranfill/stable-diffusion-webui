@@ -107,7 +107,7 @@ if USE_NGROK:
             print('trying to connect to ngrok...')
     print("ngrok tunnel \"{}\" -> \"http://127.0.0.1:{}\"".format(public_url, port))
 
-update_server_url(public_url, snippet_id=0)
+    update_server_url(public_url, snippet_id=0)
 
 for name in QR_CODE_SHM_NAMES:
     screen_id = int(name.split('_')[-1])
@@ -116,7 +116,7 @@ for name in QR_CODE_SHM_NAMES:
 
 
 class Img2ImgRequest(BaseModel):
-    for_screen: int
+    for_screen: int = None
     image: str | None = None
     prompt: str | None = None
 
@@ -126,6 +126,11 @@ async def process_img2img_req(
         data: Img2ImgRequest
 ):
     for_screen = data.for_screen
+    if for_screen is None:
+        # Assign to least recently used screen
+        for_screen = np.argmin([shared_settings[f'{i}_last_frame'] for i in range(NUM_SCREENS)])
+        print(f'Assigning to screen {for_screen}')
+
     image = data.image
     prompt = data.prompt
 
