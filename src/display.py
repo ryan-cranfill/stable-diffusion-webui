@@ -31,6 +31,49 @@ display_images = {name: np.zeros((*TARGET_SIZE, 3)) for name in IMG_SHM_NAMES}
 full_display_images = {name: np.zeros((*TARGET_SIZE, 3)) for name in IMG_SHM_NAMES}
 
 
+def zoom_at(img, zoom, coord=None):
+    """
+    Simple image zooming without boundary checking.
+    Centered at "coord", if given, else the image center.
+
+    img: numpy.ndarray of shape (h,w,:)
+    zoom: float
+    coord: (float, float)
+    """
+    # Translate to zoomed coordinates
+    h, w, _ = [zoom * i for i in img.shape]
+
+    if coord is None:
+        cx, cy = w / 2, h / 2
+    else:
+        cx, cy = [zoom * c for c in coord]
+
+    img = cv2.resize(img, (0, 0), fx=zoom, fy=zoom)
+    img = img[int(round(cy - h / zoom * .5)): int(round(cy + h / zoom * .5)),
+              int(round(cx - w / zoom * .5)): int(round(cx + w / zoom * .5)),
+              :]
+
+    return img
+
+
+def padded_zoom(img, zoom_factor=0.8):
+    """
+       Zoom in/out an image while keeping the input image shape.
+       i.e., zero pad when factor<1, clip out when factor>1.
+    """
+    if zoom_factor < 1:  # zero padded
+        out = np.zeros_like(img)
+        zoomed = cv2.resize(img, None, fx=zoom_factor, fy=zoom_factor)
+
+        h, w, c = img.shape
+        zh, zw, zc = zoomed.shape
+
+        out[(h - zh) // 2:-(h - zh) // 2, (w - zw) // 2:-(w - zw) // 2] = zoomed
+        return out
+    else:
+        return zoom_at(img, zoom_factor)
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -62,12 +105,13 @@ class App(QWidget):
         pass
 
     def update(self, blend_steps=75):
-#        resized_new = self.transform_to_screen([display_images[self.name], shared_mem_manager[f'qr_code_{self.screen}']])
+        #        resized_new = self.transform_to_screen([display_images[self.name], shared_mem_manager[f'qr_code_{self.screen}']])
         resized_new = self.transform_to_screen(display_images[self.name])
         if blend_steps and resized_new.shape == full_display_images[self.name].shape:
             # print(resized_new.shape, full_display_images[self.name].shape)
             for i in range(blend_steps):
-                new_img = cv2.addWeighted(resized_new, i / blend_steps, full_display_images[self.name], 1 - i / blend_steps, 0)
+                new_img = cv2.addWeighted(resized_new, i / blend_steps, full_display_images[self.name],
+                                          1 - i / blend_steps, 0)
                 self.label.setPixmap(self.array_to_pixmap(new_img))
                 self.label.adjustSize()
                 self.repaint()
@@ -127,7 +171,8 @@ class App(QWidget):
         if isinstance(image, list):
             # If the images aren't all the same size, resize to the largest
             if resize_to is None:
-                resize_to = (max([img.shape[1] for img in image] + [self.mon.x]), max([img.shape[0] for img in image] + [self.mon.y]))
+                resize_to = (max([img.shape[1] for img in image] + [self.mon.x]),
+                             max([img.shape[0] for img in image] + [self.mon.y]))
             for i, img in enumerate(image):
                 # If the width isn't the same, resize while keeping the same aspect ratio
                 if img.shape[1] != resize_to[0]:
@@ -141,7 +186,12 @@ class App(QWidget):
 
         rotation_adjustment = shared_settings.get('other_settings', {}).get(f'rotation_screen_{self.screen}')
         if rotation_adjustment:
-            image = ndimage.rotate(image, rotation_adjustment, reshape=False,)
+            image = ndimage.rotate(image, rotation_adjustment, reshape=False, )
+
+        zoom_adjustment = shared_settings.get('other_settings', {}).get(f'zoom_screen_{self.screen}')
+        if zoom_adjustment and zoom_adjustment != 1:
+            # image = zoom_at(image, zoom_adjustment)
+            image = padded_zoom(image, zoom_adjustment)
 
         if resize_to is not None and not already_resized:
             image = cv2.resize(image, resize_to)

@@ -80,7 +80,6 @@ origins = [
     'http://www.windowsvistas.com', 'https://www.windowsvistas.com',
 ]
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
