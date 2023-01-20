@@ -8,7 +8,7 @@
   "scripts": {
     "clean": "rm dist/bundle.js",
     "start": "parcel src/index.html src/admin.html",
-    "build": "parcel build --dist-dir build src/index.html"
+    "build": "rm -rf build && parcel build --dist-dir build src/index.html"
   },
   "dependencies": {
     "axios": "^1.2.2",

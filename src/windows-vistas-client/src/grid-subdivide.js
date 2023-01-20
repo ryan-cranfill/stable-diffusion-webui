@@ -211,8 +211,14 @@ export const gridSketch = (p) => {
   }
 
   p.touchMoved = () => {
-    // prevent the display from moving around when you touch it
-    return false;
+    // check if within canvas
+    if (
+        p.mouseX > 0 && p.mouseX < p.width &&
+        p.mouseY > 0 && p.mouseY < p.height
+    ) {
+      // prevent the display from moving around when you touch it if it's within the canvas
+      return false;
+    }
   }
 
   p.saveTemp = () => {

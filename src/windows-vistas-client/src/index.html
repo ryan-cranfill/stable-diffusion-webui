@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark:bg-slate-800">
+<html class="bg-slate-800">
     <head>
         <title>Windows Vistas</title>
         <meta charset="utf-8">
@@ -12,9 +12,9 @@
             let serverUrl;
         </script>
     </head>
-    <body>
+    <body class="">
         <script src="index.js" type="module"></script>
-        <div class="hidden md:visible md:flex h-screen flex">
+        <div class="hidden md:visible md:flex h-screen flex max-h-screen">
             <div class="text-center m-auto">
                 <h1 class="text-4xl text-white">
                     Sorry, this is a mobile experience only.
@@ -27,21 +27,27 @@
                 </h2>
             </div>
         </div>
-        <div id="app" class="md:hidden rounded-lg px-4 py-2 h-screen">
-            <h1 class="dark:text-white text-3xl pb-4 text-center">WINDOWS VISTAS <i id="whatisthis" class="fa fa-question-circle" style="font-size:30px"></i></h1>
-            <div id="interactiveMount" class="w-full h-3/4 max-w-screen-sm"></div>
+        <div id="app" class="md:hidden rounded-lg px-4 py-2 h-screen flex flex-col overflow-hidden">
+            <h1 class="dark:text-white text-3xl pt-2 pb-4 text-center flex items-center justify-center">WINDOWS VISTAS
+                <i id="whatisthis" class="ml-auto fa fa-question-circle" style="font-size:30px"></i>
+            </h1>
+            <div id="interactiveMount" class="w-full h-[60%] flex-grow 1 max-w-screen-sm m-auto"></div>
 
-            <div id="inputs" class="pt-8">
-<!--                <input type="text" id="promptInput" placeholder="Garfield" value="Garfield">-->
-                <button class="bg-transparent disabled:border-gray-400 disabled:text-gray-400 disabled:hover:bg-gray-400 disabled:hover:text-white hover:bg-blue-300 text-blue-300 font-semibold hover:text-white py-2 px-4 border border-blue-300 hover:border-transparent rounded" id="resetButton">New</button>
+<!--            <div id="inputs" class="h-[25%] relative bottom-[-5%]">-->
+            <div id="inputs" class="h-[25%] relative">
+                <div class="top-1/2 translate-y-1/2">
+                    <button class="bg-transparent disabled:border-gray-400 disabled:text-gray-400 disabled:hover:bg-gray-400 disabled:hover:text-white hover:bg-blue-300 text-blue-300 font-semibold hover:text-white py-2 px-4 border border-blue-300 hover:border-transparent rounded" id="resetButton">New</button>
                 <button class="ml-4 bg-transparent disabled:border-gray-400 disabled:text-gray-400 disabled:hover:bg-gray-400 disabled:hover:text-white hover:bg-blue-300 text-blue-300 font-semibold hover:text-white py-2 px-4 border border-blue-300 hover:border-transparent rounded" id="changeColorsButton">Recolor</button>
 <!--                <select id="subject-select" class="w-2/5"></select>-->
                 <button class="right-4 absolute disabled:border-gray-400 disabled:text-gray-400 disabled:hover:bg-gray-400 disabled:hover:text-white bg-transparent hover:bg-blue-300 text-blue-300 font-semibold hover:text-white py-2 px-4 border border-blue-300 hover:border-transparent rounded" id="saveButton">Submit</button>
+                </div>
+<!--                <input type="text" id="promptInput" placeholder="Garfield" value="Garfield">-->
+
             </div>
 
             <!--info modal content-->
             <div
-                class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+                class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-[95%] w-[95%] m-auto rounded"
                 id="info-modal"
             >
                 <div
@@ -55,20 +61,20 @@
                             </p>
                             <video
                                 autoplay loop muted playsinline
-                                class="w-1/3 mx-auto"
+                                class="w-[28%] mx-auto"
                             >
-                                <source src="../static/video/touch_tut_small.webm" type="video/webm">
-                                <source src="../static/video/touch_tut_small.mp4" type="video/mp4">
+                                <source src="video/touch_tut_small.webm" type="video/webm">
+                                <source src="video/touch_tut_small.mp4" type="video/mp4">
                             </video>
                             <p class="text-sm text-gray-500  py-2">
                                 To randomize all colors, click <b>Recolor</b>. To get a new set of panes, click <b>New</b>.
                             </p>
                             <video
                                 autoplay loop muted playsinline
-                                class="w-1/3 mx-auto"
+                                class="w-[28%] mx-auto"
                             >
-                                <source src="../static/video/recolor_tut_small.webm" type="video/webm">
-                                <source src="../static/video/recolor_tut_small.mp4" type="video/mp4">
+                                <source src="video/recolor_tut_small.webm" type="video/webm">
+                                <source src="video/recolor_tut_small.mp4" type="video/mp4">
                             </video>
                             <p class="text-sm text-gray-500 py-2">
                                 When you're ready for the AI to turn your panes into stained glass windows, click <b>Submit</b>.
