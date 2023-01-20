@@ -75,7 +75,9 @@ app = FastAPI()
 # app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 origins = [
-    "*",
+    "*" if not USE_NGROK
+    else 'http://windowsvistas.com', 'https://windowsvistas.com',
+    'http://www.windowsvistas.com', 'https://www.windowsvistas.com',
 ]
 
 
