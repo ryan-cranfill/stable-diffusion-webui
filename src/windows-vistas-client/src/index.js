@@ -67,27 +67,42 @@ resetButton.addEventListener('click', () => {
   interactiveSketch.resetSketch();
 })
 
+const minTimeBetweenSubmissions = 1000 * 60 * 1 // 1 minutes
+function getLastSubmissionTime() {
+  // Look in local cookies for last submission time
+    let lastSubmissionTime = localStorage.getItem('windowVistasLastSubmissionTime')
+    if (lastSubmissionTime) {
+        lastSubmissionTime = parseInt(lastSubmissionTime)
+    } else {
+        lastSubmissionTime = 0
+    }
+    return lastSubmissionTime
+}
+
+function setLastSubmissionTime() {
+    localStorage.setItem('windowVistasLastSubmissionTime', Date.now())
+}
+
 document.getElementById('changeColorsButton').addEventListener('click', () => {
   interactiveSketch.randomizeColors();
 })
 
 const saveButton = document.getElementById('saveButton')
 saveButton.addEventListener('click', () => {
-  console.log('save button clicked')
-  // Disable save button
-  saveButton.disabled = true;
-  resetButton.disabled = true;
+    console.log('save button clicked')
+    if (Date.now() - getLastSubmissionTime() < minTimeBetweenSubmissions) {
+        alert('You have already submitted a window recently. Please wait a bit before submitting again.')
+        return
+    }
+    // Disable save button
+    saveButton.disabled = true;
+    resetButton.disabled = true;
 
-  // get p5 pixels then post to server
-  let imageBase64String = interactiveSketch.saveTemp();
-  // const prompt = document.getElementById('promptInput').value
-  // let prompt = document.getElementById('subject-select').value
-  // prompt = `a beautiful intricate ornate ((stained glass window)) of (((${prompt}))) high quality flickr`
-  // const denoisingStrength = document.getElementById('denoising-range').value / 100
-  // const passcode = document.getElementById('passcodeInput').value
-  const url = `${HOST}process_img2img`
-  console.log(url)
-  const queryParams = decodeURI(window.location.search)
+    // get p5 pixels then post to server
+    let imageBase64String = interactiveSketch.saveTemp();
+    const url = `${HOST}process_img2img`
+    console.log(url)
+    const queryParams = decodeURI(window.location.search)
                       .replace('?', '')
                       .split('&')
                       .map(param => param.split('='))
@@ -95,20 +110,21 @@ saveButton.addEventListener('click', () => {
                         values[ key ] = value
                         return values
                       }, {})
-  const for_screen = parseInt(queryParams.screen) || 0
-  // axios.post(url, {image: imageBase64String, prompt: prompt, for_screen}
-  axios.post(url, {image: imageBase64String, for_screen}).then(response => {
-    const changes = response.data
-    console.log(changes)
-    saveButton.disabled = false;
-    resetButton.disabled = false;
-    alert('Success! Your stained glass will appear shortly :-D')
-  }).catch(reason => {
-    console.log(reason)
-    alert('Uh oh! Something went wrong, please try again. If the error persists, try refreshing.')
-    saveButton.disabled = false;
-    resetButton.disabled = false;
-  })
+    const for_screen = parseInt(queryParams.screen) || 0
+    // axios.post(url, {image: imageBase64String, prompt: prompt, for_screen}
+    axios.post(url, {image: imageBase64String, for_screen}).then(response => {
+        const changes = response.data
+        console.log(changes)
+        saveButton.disabled = false;
+        resetButton.disabled = false;
+        alert('Success! Your stained glass will appear shortly :-D')
+        setLastSubmissionTime()
+    }).catch(reason => {
+        console.log(reason)
+        alert('Uh oh! Something went wrong, please try again. If the error persists, try refreshing.')
+        saveButton.disabled = false;
+        resetButton.disabled = false;
+    })
 })
 
 $(document).ready(function() {
