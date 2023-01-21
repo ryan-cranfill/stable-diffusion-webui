@@ -70,7 +70,7 @@ DEFAULT_SHARED_SETTINGS = {
         "seed_resize_from_w": -1,
     },
     'other_settings': {
-        'frame_every_n_seconds': 7.5,
+        'frame_every_n_seconds': 2.5,
         'num_screens': NUM_SCREENS,
         'loopback_mode': True,
         'max_generations': 25,  # maximum number of generations to run for a source; when hit, use the original input
@@ -80,6 +80,9 @@ DEFAULT_SHARED_SETTINGS = {
         'zoom_screen_0': 1,
         'zoom_screen_1': 1,
         'zoom_screen_2': 1,
+        'slow_gen_mode_start_hour': 0,
+        'slow_gen_mode_end_hour': 15,
+        'slow_gen_mode_frame_every_n_seconds': 10,
     },
     # 'source_img_0': encode_pil_to_base64(DEFAULT_IMG),
     # 'source_img_1': encode_pil_to_base64(DEFAULT_IMG),

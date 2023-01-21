@@ -4,6 +4,7 @@ import time
 import shlex
 import numpy as np
 from PIL import Image
+from datetime import datetime
 
 # Dumb but makes it so we can use webui-user.sh
 commandline_args = os.environ.get('COMMANDLINE_ARGS', "")
@@ -20,6 +21,9 @@ from src.settings import REMOVE_FROM_REQ_KEYS, NUM_SCREENS
 
 # Connect to shared memory on startup
 shared_settings, shared_mem_manager = connect_to_shared()
+
+slow_gen_start_time = shared_settings['other_settings'].get('slow_gen_mode_start_hour', 0)
+slow_gen_end_time = shared_settings['other_settings'].get('slow_gen_mode_end_hour', 15)
 
 
 def img2imgapi(img2imgreq: StableDiffusionImg2ImgProcessingAPI) -> Image.Image:
@@ -60,6 +64,13 @@ def img2imgapi(img2imgreq: StableDiffusionImg2ImgProcessingAPI) -> Image.Image:
 
 def decay_denoising_strength(num_frames_generated: int, base_strength: float, decay_rate: float = .05, min_val: float = 0.5) -> float:
     return max(base_strength * np.exp(-decay_rate * num_frames_generated), min_val)
+
+
+def get_frame_interval():
+    now = datetime.now()
+    if slow_gen_start_time <= now.hour < slow_gen_end_time:
+        return shared_settings['other_settings'].get('slow_gen_mode_frame_every_n_seconds', 10)
+    return shared_settings['other_settings'].get('frame_every_n_seconds', 2.5)
 
 
 def generate_image(i):
@@ -119,7 +130,7 @@ if __name__ == '__main__':
             print(f'Finished generating image for screen {i} in {duration} seconds')
 
             # Rate limit to not blow up the GPU
-            frame_every_n_seconds = shared_settings['other_settings']['frame_every_n_seconds']
+            frame_every_n_seconds = get_frame_interval()
             if duration < frame_every_n_seconds:
                 time.sleep(frame_every_n_seconds - duration)
 
