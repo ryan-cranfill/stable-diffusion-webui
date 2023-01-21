@@ -33,7 +33,7 @@ SETTINGS_CACHE_PATH = 'settings_cache'
 REMOVE_FROM_REQ_KEYS = ['script_name']
 
 # Number of screens to run on
-NUM_SCREENS = int(os.getenv('NUM_MONITORS')) or 1
+NUM_SCREENS = int(os.getenv('NUM_MONITORS', 1))
 SCREEN_MAP = {
     0: 1,
 }
@@ -70,7 +70,7 @@ DEFAULT_SHARED_SETTINGS = {
         "seed_resize_from_w": -1,
     },
     'other_settings': {
-        'frame_every_n_seconds': 7.5,
+        'frame_every_n_seconds': 2.5,
         'num_screens': NUM_SCREENS,
         'loopback_mode': True,
         'max_generations': 25,  # maximum number of generations to run for a source; when hit, use the original input

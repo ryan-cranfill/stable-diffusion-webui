@@ -10,7 +10,8 @@ module.exports = {
       env: {
         "USE_NGROK": "true",
         "NUM_MONITORS": 3,
-      }
+      },
+      time: true,
     },
     {
       name   : "display",
@@ -19,6 +20,7 @@ module.exports = {
         "DISPLAY": ":0",
         "NUM_MONITORS": 3,
       },
+      time: true,
       // listen_timeout: 30000,
     },
     {
@@ -27,7 +29,8 @@ module.exports = {
       env: {
         "USE_NGROK": "true",
         "NUM_MONITORS": 3,
-      }
+      },
+      time: true,
     },
   ]
 }
