@@ -186,6 +186,10 @@ async def update_settings(data: dict):
         shared_settings['generation_settings'][k] = v
     for k, v in data.get('other_settings', {}).items():
         shared_settings['other_settings'][k] = v
+    # update prompt
+    for k, v in data.items():
+        if 'prompt' in k:
+            shared_settings[k] = v
     return {'status': 'success'}
 
 

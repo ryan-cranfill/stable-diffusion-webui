@@ -82,7 +82,8 @@ def generate_image(i):
 
     req.denoising_strength = decay_denoising_strength(
         shared_settings[f'{i}_num_frames_generated'],
-        shared_settings['generation_settings']['denoising_strength']
+        shared_settings['generation_settings']['denoising_strength'],
+        shared_settings['other_settings'].get('denoising_decay_rate', .05),
     )
     # print(req.denoising_strength)
 

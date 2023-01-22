@@ -35,3 +35,4 @@ notification.mp3
 /cache.json
 settings_cache.db
 .env
+settings_cache

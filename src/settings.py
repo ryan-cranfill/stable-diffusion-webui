@@ -54,7 +54,7 @@ DEFAULT_SHARED_SETTINGS = {
     'generation_settings': {
         "batch_size": 1,
         "n_iter": 1,
-        "steps": 20,
+        "steps": 35,
         "cfg_scale": 8.5,
         "width": TARGET_WIDTH,
         "height": TARGET_HEIGHT,
@@ -83,13 +83,14 @@ DEFAULT_SHARED_SETTINGS = {
         'slow_gen_mode_start_hour': 0,
         'slow_gen_mode_end_hour': 15,
         'slow_gen_mode_frame_every_n_seconds': 10,
+        'denoising_decay_rate': 0.03,
     },
     # 'source_img_0': encode_pil_to_base64(DEFAULT_IMG),
     # 'source_img_1': encode_pil_to_base64(DEFAULT_IMG),
     # 'source_img_2': encode_pil_to_base64(DEFAULT_IMG),
-    'prompt_0': 'a stained glass window of an onion stainedglassstyle',
-    'prompt_1': 'a stained glass window of a donkey stainedglassstyle',
-    'prompt_2': 'a stained glass window of Shrek stainedglassstyle',
+    'prompt_0': 'a stained glass window stainedglassstyle',
+    'prompt_1': 'a stained glass window stainedglassstyle',
+    'prompt_2': 'a stained glass window stainedglassstyle',
     # When a new initial image or prompt get added, flip this to True
     # Defaults to true, so that the first time the app is run, it will generate a new image
     '0_changed': time.time(),
