@@ -28,6 +28,7 @@ DEFAULT_IMG_PATH = SRC_DIR / 'windows-vistas-text-sideways.png'
 DEFAULT_IMG = Image.open(DEFAULT_IMG_PATH).convert('RGB')
 IMAGE_OPTIONS = [DEFAULT_IMG_PATH] + IMAGE_OPTIONS
 SETTINGS_CACHE_PATH = 'settings_cache'
+CODES_CACHE_PATH = 'codes_cache'
 
 # Need to manually remove these keys from the request, because they are not in the processing class
 REMOVE_FROM_REQ_KEYS = ['script_name']

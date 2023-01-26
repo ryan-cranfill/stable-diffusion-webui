@@ -20,6 +20,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 
 
+from src.code_manager import CodeManager
 from src.netlify import update_server_url
 from src.utils import decode_image, make_banner
 from src.sharing import SharedDict, SharedMemManager
@@ -42,6 +43,8 @@ except (AlreadyExists, CannotAttachSharedMemory, FileNotFoundError):
     initial_settings = DEFAULT_SHARED_SETTINGS
 shared_settings = UltraDict(initial_settings, name=SHARED_SETTINGS_MEM_NAME, recurse=True, auto_unlink=RECREATE_IF_EXISTS)
 shared_mem_manager = SharedMemManager(SHM_NAMES, is_client=False, shapes=SHM_SHAPES, recreate_if_exists=RECREATE_IF_EXISTS)
+
+code_manager = CodeManager()
 
 
 def load_settings():
@@ -114,6 +117,7 @@ if USE_NGROK:
     print("ngrok tunnel \"{}\" -> \"http://127.0.0.1:{}\"".format(public_url, port))
 
     update_server_url(public_url, snippet_id=0)
+shared_settings['public_url'] = public_url
 
 for name in QR_CODE_SHM_NAMES:
     screen_id = int(name.split('_')[-1])
@@ -125,6 +129,7 @@ class Img2ImgRequest(BaseModel):
     for_screen: int = None
     image: str | None = None
     prompt: str | None = None
+    code: str | None = None
 
 
 @app.post("/process_img2img")
@@ -132,6 +137,15 @@ class Img2ImgRequest(BaseModel):
 async def process_img2img_req(
         data: Img2ImgRequest
 ):
+    # Confirm that is code is valid. If so, expire it. If not, return error.
+    code = data.code
+    if code:
+        if not code_manager.validate_code(code):
+            return {'success': False, 'message': 'invalid code'}
+        code_manager.expire(code)
+    else:
+        return {'success': False, 'message': 'no code provided'}
+
     for_screen = data.for_screen
     if for_screen is None:
         # Assign to least recently used screen
@@ -243,6 +257,17 @@ async def save_settings():
 async def load_settings_endpoint():
     load_settings()
     return {'status': 'success'}
+
+
+# Simple API for clients to tell the server they received a code
+@app.get('/received_code/{code}')
+async def received_code(code: str):
+    confirmed = code_manager.confirm_code(code)
+    if confirmed:
+        shared_settings['qr_code_needs_change'] = True
+        return {'status': 'success'}
+    else:
+        return {'status': 'failure - code not found'}
 
 
 app.mount("/", StaticFiles(directory="src/windows-vistas-client/dist", html=True), name="static")

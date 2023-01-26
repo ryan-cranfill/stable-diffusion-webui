@@ -2,28 +2,33 @@ import sys
 import cv2
 import time
 import signal
+import qrcode
 import functools
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw, ImageOps, ImageFont
 from PyQt6 import QtCore
 from scipy import ndimage
 from screeninfo import get_monitors
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPixmap, QImage
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QMainWindow
+from qrcode.image.styledpil import StyledPilImage
+from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
 
 from src.upscale import upscale_img
+from src.code_manager import CodeManager
 from src.utils import connect_to_shared
 from src.settings import IMAGE_OPTIONS, TARGET_SIZE, NUM_SCREENS, SCREEN_MAP, DEFAULT_IMG_PATH, IMG_SHM_NAMES
 
 UPSCALE = True
 
 shared_settings, shared_mem_manager = connect_to_shared()
+code_manager = CodeManager()
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 monitors = get_monitors()
-monitors = [m for m in monitors if m.name != 'DP-0']
+# monitors = [m for m in monitors if m.name != 'DP-0']
 monitors = monitors[:NUM_SCREENS]
 print('monitors:', monitors)
 current_images = {name: np.zeros((*TARGET_SIZE, 3)) for name in IMG_SHM_NAMES}
@@ -74,6 +79,29 @@ def padded_zoom(img, zoom_factor=0.8):
         return zoom_at(img, zoom_factor)
 
 
+def draw_text_vertically(d: ImageDraw.ImageDraw, text: str, font_size: int = 80,
+                         char_padding: int = 10, x=100, start_y=100, fill=(255, 255, 255)):
+    # Write text vertically by iterating through characters
+    for i, c in enumerate(text):
+        d.text(
+            (x, font_size * i + char_padding * i + start_y),
+            c,
+            fill=fill,
+            font=ImageFont.truetype('src/robotomono.ttf', font_size)
+        )
+
+
+def draw_text(d: ImageDraw.ImageDraw, text: str, font_size: int = 80,
+              x=100, y=100, fill=(255, 255, 255)):
+    d.text(
+        (x, y),
+        text,
+        fill=fill,
+        font=ImageFont.truetype('src/robotomono.ttf', font_size)
+    )
+
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -83,6 +111,109 @@ class MainWindow(QMainWindow):
             ex = App(screen=i, fullscreen=True)
             ex.show()
             self.windows.append(ex)
+        self.qr_app = QRCodeApp()
+
+
+class QRCodeApp(QWidget):
+    def __init__(self, screen=None, target_size=(1920, 1080)):
+        super().__init__()
+        if screen is None:
+            # Find the 1080p monitor
+            for i, m in enumerate(monitors):
+                if m.width == target_size[0] and m.height == target_size[1]:
+                    screen = i
+                    break
+        self.screen = screen
+        self.mon = monitors[screen]
+        self.w, self.h = self.mon.width, self.mon.height
+
+        self.label = QLabel(self)
+        self.initUI()
+        self.current_code, self.current_img = self.make_code()
+
+        self.update_image(self.current_img)
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.check_for_code_changes)
+        self.timer.start(250)
+        self.show()
+
+    def initUI(self):
+        print(self.mon)
+        self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint | QtCore.Qt.WindowType.WindowStaysOnTopHint | QtCore.Qt.WindowType.WindowDoesNotAcceptFocus)
+        self.setCursor(Qt.CursorShape.BlankCursor)
+        self.move(self.mon.x, 0)
+        # For some reason full screen doesn't work till you show the window/image first
+        self.setGeometry(self.mon.x, self.mon.y, self.mon.width, self.mon.height)
+
+    def make_code(self) -> (str, Image.Image):
+        code = code_manager.get_code()
+        # Create QR Code image
+        public_url = shared_settings.get('public_url')
+        if public_url is None:
+            print('No public url set, using default')
+            public_url = 'http://localhost:5000'
+        full_url = f'{public_url}?code={code}'
+        print(f'full url: {full_url}')
+        # img = qrcode.make(full_url)
+        img = self.make_image(full_url)
+        return code, img
+
+    def make_image(self, url):
+        img = Image.new('RGB', (self.w, self.h), color=(0, 0, 0))
+        d = ImageDraw.Draw(img)
+
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=self.h/20)
+        qr.add_data(url)
+        qr_img = qr.make_image(
+            image_factory=StyledPilImage,
+            module_drawer=RoundedModuleDrawer(),
+            # fill_color="white", back_color="black"
+        )
+        qr_img = ImageOps.invert(qr_img)
+        # qr_img = qr.make_image(
+        #     fill_color="white", back_color="black", module_drawer=RoundedModuleDrawer()
+        # )
+
+        # Resize the QR code to fit the banner
+        padding = 300
+        qr_img.thumbnail((self.h - padding, self.h - padding))
+        # Paste the QR code on the right side of the banner
+        img.paste(qr_img, (int((self.w - qr_img.width) / 2), padding // 2))
+
+        # draw_text_vertically(d, 'WINDOWS', x=150, start_y=200, font_size=100)
+        # draw_text_vertically(d, 'VISTAS', x=450, start_y=200, font_size=100)
+        draw_text(d, 'WINDOWS VISTAS', x=300, y=10, font_size=150)
+        draw_text(d, 'SCAN TO INTERACT', x=200, y=self.h-220, font_size=150)
+
+        return img
+
+    def check_for_code_changes(self):
+        # Check if current code is still unclaimed
+        if shared_settings.get('qr_code_needs_change', False):
+            # Make a new code
+            self.current_code, current_img = self.make_code()
+            # And update the image
+            self.update_image(current_img)
+            # And reset the flag
+            shared_settings['qr_code_needs_change'] = False
+
+    def update_image(self, img: Image.Image):
+        # Convert to pixmap
+        img = img.convert('RGB')
+        # img = img.resize((self.w, self.h))
+        pixmap = self.array_to_pixmap(np.array(img))
+        # Set the pixmap
+        self.label.setPixmap(pixmap)
+        self.label.adjustSize()
+        self.repaint()
+
+    def array_to_pixmap(self, image, resize_to=None, rotate=True) -> QPixmap:
+        h, w, ch = image.shape
+        bytes_per_line = ch * w
+        qimage = QImage(image, w, h, bytes_per_line, QImage.Format.Format_RGB888)
+        pixmap = QPixmap.fromImage(qimage)
+        return pixmap
 
 
 class App(QWidget):

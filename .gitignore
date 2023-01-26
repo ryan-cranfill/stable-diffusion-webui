@@ -36,3 +36,4 @@ notification.mp3
 settings_cache.db
 .env
 settings_cache
+/codes_cache.*
