@@ -10,7 +10,7 @@
 current_time=$(date +%H%M)
 
 # If the current time is between 5:15pm and 7am, start the server.
-if [[ $current_time -ge 1715 ]] || [[ $current_time -lt 700 ]]; then
+if [[ $current_time -ge 1700 ]] || [[ $current_time -le 700 ]]; then
     # Start the server.
     echo "Starting server..."
     . /home/ryan/stable-diffusion-webui/start_pm2.sh
