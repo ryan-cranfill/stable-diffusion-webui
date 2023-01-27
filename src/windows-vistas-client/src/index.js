@@ -9,6 +9,15 @@ if (module.hot) {
   });
 }
 
+const queryParams = decodeURI(window.location.search)
+                  .replace('?', '')
+                  .split('&')
+                  .map(param => param.split('='))
+                  .reduce((values, [ key, value ]) => {
+                    values[ key ] = value
+                    return values
+                  }, {})
+
 // Disable zooming on mobile devices
 document.addEventListener('touchmove', function (event) {
   if (event.scale !== 1) { event.preventDefault(); }
@@ -146,15 +155,7 @@ saveButton.addEventListener('click', () => {
     let imageBase64String = interactiveSketch.saveTemp();
     const url = `${HOST}process_img2img`
     console.log(url)
-    const queryParams = decodeURI(window.location.search)
-                      .replace('?', '')
-                      .split('&')
-                      .map(param => param.split('='))
-                      .reduce((values, [ key, value ]) => {
-                        values[ key ] = value
-                        return values
-                      }, {})
-    const data = {image: imageBase64String}
+    const data = {image: imageBase64String, code: queryParams.code}
     const for_screen = parseInt(queryParams.screen)
     if (for_screen) {
         data.for_screen = for_screen
@@ -165,23 +166,32 @@ saveButton.addEventListener('click', () => {
         console.log(changes)
         saveButton.disabled = false;
         resetButton.disabled = false;
-        alert('Success! Your stained glass will appear shortly :-D')
-        setLastSubmissionTime()
+        if (changes.success === true) {
+            alert('Success! Your stained glass will appear shortly :-D')
+            setLastSubmissionTime()
+        } else {
+            alert('Uh oh! Something went wrong, please wait a few seconds and try again. If the error persists, try scanning the code again.')
+        }
     }).catch(reason => {
         console.log(reason)
-        alert('Uh oh! Something went wrong, please wait a few seconds and try again. If the error persists, try refreshing.')
+        alert('Uh oh! Something went wrong, please wait a few seconds and try again. If the error persists, try scanning the code again.')
         saveButton.disabled = false;
         resetButton.disabled = false;
     })
 })
 
 $(document).ready(function() {
-  select2($);
-  const subjectSelect = $('#subject-select');
-  subjectSelect.select2({data: subjectChoices});
-  subjectSelect.on('select2:select', function (e) {
-    const data = e.params.data;
-    console.log(data);
-  });
+  // select2($);
+  // const subjectSelect = $('#subject-select');
+  // subjectSelect.select2({data: subjectChoices});
+  // subjectSelect.on('select2:select', function (e) {
+  //   const data = e.params.data;
+  //   console.log(data);
+  // });
+    // Tell server I received the code
+    const code = queryParams.code
+    if (code) {
+        axios.get(`${HOST}received_code/${code}`)
+    }
 });
 

@@ -101,7 +101,6 @@ def draw_text(d: ImageDraw.ImageDraw, text: str, font_size: int = 80,
     )
 
 
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -149,10 +148,11 @@ class QRCodeApp(QWidget):
     def make_code(self) -> (str, Image.Image):
         code = code_manager.get_code()
         # Create QR Code image
-        public_url = shared_settings.get('public_url')
-        if public_url is None:
-            print('No public url set, using default')
-            public_url = 'http://localhost:5000'
+        # public_url = shared_settings.get('public_url')
+        # if public_url is None:
+        #     print('No public url set, using default')
+        #     public_url = 'http://localhost:5000'
+        public_url = 'https://windowsvistas.com'
         full_url = f'{public_url}?code={code}'
         print(f'full url: {full_url}')
         # img = qrcode.make(full_url)

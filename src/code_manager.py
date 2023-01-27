@@ -68,7 +68,7 @@ class CodeManager:
 
     def validate_code(self, code):
         # Check if the code is in the database
-        with mutex.acquire():
+        with mutex:
             with shelve.open(settings.CODES_CACHE_PATH) as db:
                 if 'confirmed_codes' not in db:
                     return False
