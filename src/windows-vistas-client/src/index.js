@@ -68,6 +68,12 @@ if (HOST.slice(-1) !== "/") {
 }
 console.log('Server URL is:', serverUrl, 'Host URL is:', HOST)
 
+// Tell server I received the code
+const code = queryParams.code
+if (code) {
+    axios.get(`${HOST}received_code/${code}`)
+}
+
 // axios.get('http://localhost:8000/pass').then((response) =>{
 //   document.getElementById('passcodeInput').setAttribute('value', response.data.passcode)
 // })
@@ -188,10 +194,5 @@ $(document).ready(function() {
   //   const data = e.params.data;
   //   console.log(data);
   // });
-    // Tell server I received the code
-    const code = queryParams.code
-    if (code) {
-        axios.get(`${HOST}received_code/${code}`)
-    }
 });
 
