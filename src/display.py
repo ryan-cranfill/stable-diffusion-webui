@@ -21,6 +21,7 @@ from src.utils import connect_to_shared
 from src.settings import IMAGE_OPTIONS, TARGET_SIZE, NUM_SCREENS, SCREEN_MAP, DEFAULT_IMG_PATH, IMG_SHM_NAMES
 
 UPSCALE = True
+QR_MONITOR_RES = (1920, 1080)
 
 shared_settings, shared_mem_manager = connect_to_shared()
 code_manager = CodeManager()
@@ -28,8 +29,10 @@ code_manager = CodeManager()
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 monitors = get_monitors()
+# Filter out QR monitor
+display_monitors = [m for m in monitors if m.width != QR_MONITOR_RES[0] and m.height != QR_MONITOR_RES[1]]
 # monitors = [m for m in monitors if m.name != 'DP-0']
-monitors = monitors[:NUM_SCREENS]
+display_monitors = display_monitors[:NUM_SCREENS]
 print('monitors:', monitors)
 current_images = {name: np.zeros((*TARGET_SIZE, 3)) for name in IMG_SHM_NAMES}
 display_images = {name: np.zeros((*TARGET_SIZE, 3)) for name in IMG_SHM_NAMES}
@@ -105,7 +108,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.windows = []
-        for i in range(len(monitors)):
+        for i in range(len(display_monitors)):
             print(f'making window {i}')
             ex = App(screen=i, fullscreen=True)
             ex.show()
@@ -220,7 +223,7 @@ class App(QWidget):
     def __init__(self, screen=0, fullscreen=True, w=TARGET_SIZE[0], h=TARGET_SIZE[1]):
         super().__init__()
         self.screen = screen
-        self.mon = monitors[screen]
+        self.mon = display_monitors[screen]
         self.w, self.h = w, h
         self.fullscreen = fullscreen
         self.imagenumber = 0
